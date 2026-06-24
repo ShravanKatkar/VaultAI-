@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, Trash2, FileText, Calendar, Layers, ShieldCheck, Loader2 } from 'lucide-react';
 import { use3DTilt } from '../hooks/use3DTilt';
+import { API_BASE_URL } from '../config';
 
 export default function DocumentsTab({ collections, loading, onRefresh }) {
   const uploadCardRef = use3DTilt();
@@ -66,7 +67,7 @@ export default function DocumentsTab({ collections, loading, onRefresh }) {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -103,7 +104,7 @@ export default function DocumentsTab({ collections, loading, onRefresh }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/documents/${collectionName}`, {
+      const response = await fetch(`${API_BASE_URL}/documents/${collectionName}`, {
         method: 'DELETE',
       });
 

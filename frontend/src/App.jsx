@@ -7,6 +7,7 @@ import { useTheme } from './hooks/useTheme';
 import { Landing } from './pages/Landing';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { UploadModal } from './components/Upload/UploadModal';
+import { API_BASE_URL } from './config';
 
 export default function App() {
   const { theme, toggleTheme } = useTheme();
@@ -39,7 +40,7 @@ export default function App() {
 
   const handleDeleteCollection = async (collectionName) => {
     try {
-      const response = await fetch(`http://localhost:8000/documents/${collectionName}`, {
+      const response = await fetch(`${API_BASE_URL}/documents/${collectionName}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -56,7 +57,7 @@ export default function App() {
   const fetchCollections = async () => {
     setLoadingCollections(true);
     try {
-      const response = await fetch('http://localhost:8000/documents');
+      const response = await fetch(`${API_BASE_URL}/documents`);
       if (response.ok) {
         const data = await response.json();
         setCollections(data);

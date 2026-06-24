@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useTheme } from '../../hooks/useTheme';
 import { use3DTilt } from '../../hooks/use3DTilt';
+import { API_BASE_URL } from '../../config';
 
 // Inline Tabler-equivalent SVG Icons
 const IconVault = ({ size = 20, color = 'currentColor', className = '' }) => (
@@ -158,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const res = await fetch('http://localhost:8000/documents');
+        const res = await fetch(`${API_BASE_URL}/documents`);
         setIsOllamaConnected(res.ok);
       } catch (err) {
         setIsOllamaConnected(false);
@@ -168,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const fetchModels = async () => {
       setLoadingModels(true);
       try {
-        const res = await fetch('http://localhost:8000/models');
+        const res = await fetch(`${API_BASE_URL}/models`);
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
@@ -215,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     formData.append('file', fileToUpload);
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8000/upload', true);
+    xhr.open('POST', `${API_BASE_URL}/upload`, true);
 
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {

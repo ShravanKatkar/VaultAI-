@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, Play, List, Clock, CheckCircle, AlertTriangle, ChevronRight, Loader2, Plus, Trash2, Eye } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const DEFAULT_TEST_CASES = [
   {
@@ -30,7 +31,7 @@ export default function EvaluationTab({ collections, selectedCollection }) {
   const fetchRuns = async () => {
     setLoadingRuns(true);
     try {
-      const response = await fetch('http://localhost:8000/eval/runs');
+      const response = await fetch(`${API_BASE_URL}/eval/runs`);
       if (response.ok) {
         const data = await response.json();
         setRuns(data);
@@ -49,7 +50,7 @@ export default function EvaluationTab({ collections, selectedCollection }) {
   const handleFetchRunDetail = async (runId) => {
     setLoadingRunDetail(true);
     try {
-      const response = await fetch(`http://localhost:8000/eval/runs/${runId}`);
+      const response = await fetch(`${API_BASE_URL}/eval/runs/${runId}`);
       if (response.ok) {
         const data = await response.json();
         setSelectedRun(data);
@@ -96,7 +97,7 @@ export default function EvaluationTab({ collections, selectedCollection }) {
     setSelectedRun(null);
 
     try {
-      const response = await fetch('http://localhost:8000/eval/run', {
+      const response = await fetch(`${API_BASE_URL}/eval/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

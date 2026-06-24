@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { API_BASE_URL } from '../config';
 
 export type UploadPhase =
   | 'idle'
@@ -83,7 +84,7 @@ export function useUpload() {
 
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
-    xhr.open('POST', 'http://localhost:8000/upload', true);
+    xhr.open('POST', `${API_BASE_URL}/upload`, true);
 
     // Track file transfer progress → maps to 0-40% overall
     xhr.upload.onprogress = (event) => {

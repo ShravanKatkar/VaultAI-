@@ -27,6 +27,7 @@ import {
   CartesianGrid
 } from 'recharts';
 import { use3DTilt } from '../hooks/use3DTilt';
+import { API_BASE_URL } from '../config';
 
 // Default 15 test cases covering RAG capabilities
 const DEFAULT_TEST_CASES = [
@@ -306,7 +307,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
   const fetchRuns = async () => {
     setLoadingRuns(true);
     try {
-      const response = await fetch('http://localhost:8000/eval/runs');
+      const response = await fetch(`${API_BASE_URL}/eval/runs`);
       if (response.ok) {
         const backendRuns = await response.json();
         if (backendRuns && backendRuns.length > 0) {
@@ -314,7 +315,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
           const detailedRuns = await Promise.all(
             backendRuns.slice(0, 5).map(async (run: any) => {
               try {
-                const detailRes = await fetch(`http://localhost:8000/eval/runs/${run.id}`);
+                const detailRes = await fetch(`${API_BASE_URL}/eval/runs/${run.id}`);
                 if (detailRes.ok) return await detailRes.json();
               } catch (e) {
                 console.error(e);
@@ -509,7 +510,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
     }, stepInterval);
 
     try {
-      const response = await fetch('http://localhost:8000/eval/run', {
+      const response = await fetch(`${API_BASE_URL}/eval/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

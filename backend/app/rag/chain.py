@@ -33,12 +33,20 @@ def build_rag_chain(collection_name: str, settings: Settings) -> Runnable:
     """
     retriever = get_retriever(collection_name, settings)
     
-    # Instantiate the ChatOllama model (configured for streaming)
-    llm = ChatOllama(
-        model=settings.LLM_MODEL,
-        base_url=settings.OLLAMA_BASE_URL,
-        temperature=0.0
-    )
+    # Instantiate the ChatGroq or ChatOllama model (configured for streaming)
+    if settings.USE_GROQ:
+        from langchain_groq import ChatGroq
+        llm = ChatGroq(
+            model=settings.LLM_MODEL,
+            groq_api_key=settings.GROQ_API_KEY,
+            temperature=0.0
+        )
+    else:
+        llm = ChatOllama(
+            model=settings.LLM_MODEL,
+            base_url=settings.OLLAMA_BASE_URL,
+            temperature=0.0
+        )
     
     # LCEL pipeline
     chain = (

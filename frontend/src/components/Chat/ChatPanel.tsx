@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Square, BookOpen, Database, Cpu, HelpCircle } from 'lucide-react';
 import { use3DTilt } from '../../hooks/use3DTilt';
+import { API_BASE_URL } from '../../config';
 
 // --- Type Definitions ---
 export interface SourceChunk {
@@ -627,7 +628,7 @@ export default function ChatPanel({
     let lastPushTime = 0;
 
     try {
-      const response = await fetch('http://localhost:8000/query', {
+      const response = await fetch(`${API_BASE_URL}/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

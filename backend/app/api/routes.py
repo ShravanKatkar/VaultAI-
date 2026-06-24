@@ -232,8 +232,16 @@ async def delete_document(collection_name: str):
 @router.get("/models")
 async def list_models():
     """
-    Fetches the list of models currently downloaded in the local Ollama instance.
+    Fetches the list of models available (either from Groq or from the local Ollama instance).
     """
+    if settings.USE_GROQ:
+        return [
+            {"name": "llama3-8b-8192", "size": "8.0B", "speed": 3},
+            {"name": "llama3-70b-8192", "size": "70B", "speed": 2},
+            {"name": "mixtral-8x7b-32768", "size": "46.7B", "speed": 2},
+            {"name": "gemma2-9b-it", "size": "9.0B", "speed": 3}
+        ]
+
     try:
         import httpx
         async with httpx.AsyncClient() as client:

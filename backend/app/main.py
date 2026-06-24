@@ -1,22 +1,30 @@
-import time
-import sqlite3
-import os
-import sys
-# Force tensorflow and keras to be unavailable to avoid import conflicts and speed up startup
-sys.modules['tensorflow'] = None
-sys.modules['keras'] = None
-sys.modules['tf_keras'] = None
+print("[Startup] Initializing backend main.py...")
 
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-import chromadb
+try:
+    import time
+    import sqlite3
+    import os
+    import sys
+    # Force tensorflow and keras to be unavailable to avoid import conflicts and speed up startup
+    sys.modules['tensorflow'] = None
+    sys.modules['keras'] = None
+    sys.modules['tf_keras'] = None
 
-from app.config import settings
-from app.api.routes import router as api_router
-from eval.routes import router as eval_router
+    from contextlib import asynccontextmanager
+    from fastapi import FastAPI, Request
+    from fastapi.middleware.cors import CORSMiddleware
+    import chromadb
 
-DB_PATH = os.path.join(os.getcwd(), "eval_results.db")
+    from app.config import settings
+    from app.api.routes import router as api_router
+    from eval.routes import router as eval_router
+
+    DB_PATH = os.path.join(os.getcwd(), "eval_results.db")
+except Exception as err:
+    print(f"[FATAL STARTUP ERROR] Exception raised during backend import: {err}")
+    import traceback
+    traceback.print_exc()
+    raise err
 
 def init_db() -> None:
     """Initialize SQLite database for evaluation run tracking."""
@@ -39,7 +47,11 @@ def init_db() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize SQLite database
-    init_db()
+    try:
+        init_db()
+        print(f"[Startup] SQLite database initialized at: {DB_PATH}")
+    except Exception as e:
+        print(f"[Startup] Warning: SQLite database initialization failed: {e}")
     
     # Warm up ChromaDB persistent client on startup
     try:

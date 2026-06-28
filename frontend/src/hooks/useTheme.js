@@ -1,18 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type Theme = 'dark' | 'light';
+const ThemeContext = createContext(undefined);
 
-interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider = ({ children }) => {
   // Read preference from localStorage, fallback to system preference, default to 'dark'
-  const [theme, setThemeState] = useState<Theme>(() => {
+  const [theme, setThemeState] = useState(() => {
     const stored = localStorage.getItem('vaultai-theme');
     if (stored === 'light' || stored === 'dark') return stored;
     
@@ -23,7 +15,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return 'dark';
   });
 
-  const setTheme = (newTheme: Theme) => {
+  const setTheme = (newTheme) => {
     // Add transition class to HTML element to control smooth changes
     document.documentElement.classList.add('theme-transitioning');
     
@@ -59,7 +51,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (typeof window === 'undefined' || !window.matchMedia) return;
     
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
+    const handleChange = (e) => {
       const stored = localStorage.getItem('vaultai-theme');
       // Only auto-update if the user has not set a manual override in local storage
       if (!stored) {
@@ -78,7 +70,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-export const useTheme = (): ThemeContextType => {
+export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
     throw new Error('useTheme must be used within a ThemeProvider');

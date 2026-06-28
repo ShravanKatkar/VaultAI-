@@ -69,37 +69,7 @@ const IconLoader2 = ({ size = 16, className = "" }) => (
   </svg>
 );
 
-export interface ModelInfo {
-  name: string;
-  size: string;
-  speed: number; // 1 to 3
-}
-
-export interface Collection {
-  collection_name: string;
-  filename: string;
-  chunk_count: number;
-  uploaded_at?: string;
-}
-
-export interface SidebarProps {
-  collections: Collection[];
-  selectedCollection: string;
-  setSelectedCollection: (name: string) => void;
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
-  onDeleteCollection: (name: string) => void;
-  onRefreshCollections: () => void;
-  settings: {
-    temperature: number;
-    chunkSize: number;
-    topK: number;
-  };
-  onUpdateSettings: (newSettings: { temperature: number; chunkSize: number; topK: number }) => void;
-  onRequestUpload?: () => void;
-}
-
-export const Sidebar: React.FC<SidebarProps> = ({
+export const Sidebar = ({
   collections,
   selectedCollection,
   setSelectedCollection,
@@ -112,9 +82,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onRequestUpload,
 }) => {
   const { theme, toggleTheme } = useTheme();
-  const modelSelectorRef = use3DTilt<HTMLDivElement>();
-  const [bouncingCollection, setBouncingCollection] = useState<string | null>(null);
-  const prevCollectionsRef = useRef<Collection[]>([]);
+  const modelSelectorRef = use3DTilt();
+  const [bouncingCollection, setBouncingCollection] = useState(null);
+  const prevCollectionsRef = useRef([]);
 
   useEffect(() => {
     const prev = prevCollectionsRef.current;
@@ -132,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, [collections]);
   
   // Custom model selection state
-  const [models, setModels] = useState<ModelInfo[]>([
+  const [models, setModels] = useState([
     { name: 'llama3', size: '8.0B', speed: 3 },
     { name: 'mistral', size: '7.2B', speed: 2 },
     { name: 'gemma', size: '2.5B', speed: 3 },
@@ -145,15 +115,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   // Uploading state
-  const [uploadingFile, setUploadingFile] = useState<string | null>(null);
+  const [uploadingFile, setUploadingFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   
   // Ollama status check state
   const [isOllamaConnected, setIsOllamaConnected] = useState(false);
   
   // Hidden input element ref for manual plus button uploads
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Fetch Ollama status & models on component mount
   useEffect(() => {
@@ -174,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             setModels(data);
-            const exists = data.some((m: ModelInfo) => m.name === selectedModel);
+            const exists = data.some((m) => m.name === selectedModel);
             if (!exists) {
               setSelectedModel(data[0].name);
             }
@@ -192,12 +162,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     const interval = setInterval(checkConnection, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [setSelectedModel, selectedModel]);
 
   // Close dropdown on click outside
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsDropdownOpen(false);
       }
     };
@@ -206,7 +176,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   // Dropzone file uploader implementation
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles) => {
     if (acceptedFiles.length === 0) return;
     const fileToUpload = acceptedFiles[0];
     setUploadingFile(fileToUpload.name);
@@ -274,13 +244,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const handleManualFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleManualFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       onDrop([e.target.files[0]]);
     }
   };
 
-  const getFileInfo = (filename: string) => {
+  const getFileInfo = (filename) => {
     const ext = filename.split('.').pop()?.toLowerCase() || '';
     if (ext === 'pdf') return { color: '#EF4444', label: 'PDF' };
     if (ext === 'txt') return { color: '#3B82F6', label: 'TXT' };
@@ -288,7 +258,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return { color: '#0D9488', label: 'DOC' };
   };
 
-  // SVG circular loader math
+  // SVG circular uploader math
   const strokeRadius = 14;
   const strokeCircumference = 2 * Math.PI * strokeRadius;
   const strokeOffset = strokeCircumference - (uploadProgress / 100) * strokeCircumference;

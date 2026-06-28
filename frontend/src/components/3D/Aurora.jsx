@@ -55,7 +55,7 @@ const AURORA_STYLES = `
   }
 `;
 
-export const Aurora: React.FC = () => {
+export const Aurora = () => {
   return (
     <div style={{
       position: 'absolute',
@@ -109,4 +109,5 @@ export const Aurora: React.FC = () => {
     </div>
   );
 };
+
 export default Aurora;

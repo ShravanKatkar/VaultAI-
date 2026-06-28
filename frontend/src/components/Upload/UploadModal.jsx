@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useUpload, type UploadPhase } from '../../hooks/useUpload';
+import { useUpload } from '../../hooks/useUpload';
 
 // ─── Inline SVG Icons ───────────────────────────────────────────────────────
 
-const IconUploadCloud = ({ size = 48 }: { size?: number }) => (
+const IconUploadCloud = ({ size = 48 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
     <path d="M12 12v9" />
@@ -12,19 +12,19 @@ const IconUploadCloud = ({ size = 48 }: { size?: number }) => (
   </svg>
 );
 
-const IconCheck = ({ size = 16 }: { size?: number }) => (
+const IconCheck = ({ size = 16 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 6 9 17l-5-5" />
   </svg>
 );
 
-const IconX = ({ size = 18 }: { size?: number }) => (
+const IconX = ({ size = 18 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M18 6 6 18" /><path d="m6 6 12 12" />
   </svg>
 );
 
-const IconAlertTriangle = ({ size = 20 }: { size?: number }) => (
+const IconAlertTriangle = ({ size = 20 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
     <path d="M12 9v4" /><path d="M12 17h.01" />
@@ -57,13 +57,13 @@ const IconFileMd = () => (
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function formatFileSize(bytes: number): string {
+function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function getFileTypeInfo(filename: string) {
+function getFileTypeInfo(filename) {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
   if (ext === 'pdf') return { gradient: 'linear-gradient(135deg, #EF4444, #B91C1C)', label: 'PDF Document', icon: <IconFilePdf /> };
   if (ext === 'txt') return { gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', label: 'Text File', icon: <IconFileTxt /> };
@@ -71,7 +71,7 @@ function getFileTypeInfo(filename: string) {
   return { gradient: 'linear-gradient(135deg, #6B7280, #374151)', label: 'Document', icon: <IconFileTxt /> };
 }
 
-function estimateChunks(file: File, chunkSize = 512): number {
+function estimateChunks(file, chunkSize = 512) {
   const ext = file.name.split('.').pop()?.toLowerCase();
   const avgBytesPerChunk = ext === 'pdf' ? 2000 : chunkSize;
   return Math.max(1, Math.ceil(file.size / avgBytesPerChunk));
@@ -80,7 +80,7 @@ function estimateChunks(file: File, chunkSize = 512): number {
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
 // SVG progress ring with gradient stroke
-const ProgressRing: React.FC<{ progress: number; size?: number }> = ({ progress, size = 80 }) => {
+const ProgressRing = ({ progress, size = 80 }) => {
   const stroke = 4;
   const radius = (size - stroke * 2) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -120,7 +120,7 @@ const ProgressRing: React.FC<{ progress: number; size?: number }> = ({ progress,
 };
 
 // Particle burst on success
-const ParticleBurst: React.FC = () => {
+const ParticleBurst = () => {
   const particles = useMemo(() =>
     Array.from({ length: 12 }, (_, i) => {
       const angle = (i / 12) * 360 + (Math.random() - 0.5) * 25;
@@ -150,10 +150,9 @@ const ParticleBurst: React.FC = () => {
             background: p.color,
             boxShadow: `0 0 8px ${p.color}`,
             animationDelay: `${p.delay}s`,
-            // @ts-ignore
             '--tx': `${p.tx}px`,
             '--ty': `${p.ty}px`,
-          } as React.CSSProperties}
+          }}
         />
       ))}
     </div>
@@ -161,8 +160,8 @@ const ParticleBurst: React.FC = () => {
 };
 
 // Shockwave ripple animation on upload success
-const CanvasRipple: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const CanvasRipple = () => {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -176,11 +175,11 @@ const CanvasRipple: React.FC = () => {
     };
     updateSize();
 
-    let animFrame: number;
+    let animFrame;
     const startTime = performance.now();
     const duration = 800; // 800ms total animation
 
-    const animate = (time: number) => {
+    const animate = (time) => {
       const elapsed = time - startTime;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -234,7 +233,7 @@ const CanvasRipple: React.FC = () => {
 };
 
 // Animated spinning arc for active stage
-const SpinnerArc: React.FC = () => (
+const SpinnerArc = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" className="upload-stage-spinner" style={{ position: 'absolute', inset: 0 }}>
     <circle cx="14" cy="14" r="11" fill="none" stroke="var(--accent-purple)" strokeWidth="2.5"
       strokeDasharray="20 49" strokeLinecap="round" />
@@ -247,9 +246,9 @@ const STAGES = [
   { id: 'parsing',   label: 'Parsing',   sub: 'Extracting document text...'   },
   { id: 'chunking',  label: 'Chunking',  sub: 'Splitting into semantic chunks...' },
   { id: 'embedding', label: 'Embedding', sub: 'Generating vector embeddings...' },
-] as const;
+];
 
-const STAGE_ORDER: readonly string[] = ['uploading', 'parsing', 'chunking', 'embedding', 'success'];
+const STAGE_ORDER = ['uploading', 'parsing', 'chunking', 'embedding', 'success'];
 
 // ─── Keyframes (injected once) ───────────────────────────────────────────────
 
@@ -305,20 +304,7 @@ const UPLOAD_STYLES = `
   }
 `;
 
-// ─── Props ───────────────────────────────────────────────────────────────────
-
-export interface UploadModalProps {
-  isOpen: boolean;
-  isDragHovering: boolean;
-  initialFile: File | null;
-  chunkSize?: number;
-  onClose: () => void;
-  onUploadComplete: (result: { collection_name: string; filename: string; chunks_stored: number }) => void;
-}
-
-// ─── Main Component ──────────────────────────────────────────────────────────
-
-export const UploadModal: React.FC<UploadModalProps> = ({
+export const UploadModal = ({
   isOpen,
   isDragHovering,
   initialFile,
@@ -332,15 +318,15 @@ export const UploadModal: React.FC<UploadModalProps> = ({
     selectFile, startUpload, reset,
   } = useUpload();
 
-  const browseInputRef = useRef<HTMLInputElement>(null);
-  const autoDismissRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const browseInputRef = useRef(null);
+  const autoDismissRef = useRef(null);
 
   // When initialFile is provided from App (window drop), pass it to the hook
   useEffect(() => {
     if (initialFile && isOpen) {
       selectFile(initialFile);
     }
-  }, [initialFile, isOpen]);
+  }, [initialFile, isOpen, selectFile]);
 
   // Reset hook when modal closes
   useEffect(() => {
@@ -365,7 +351,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
   }, [phase, result, onUploadComplete, onClose]);
 
   // Handle internal drop (when modal is showing the drag zone)
-  const handleModalDrop = (e: React.DragEvent) => {
+  const handleModalDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     const files = e.dataTransfer?.files;
@@ -374,7 +360,7 @@ export const UploadModal: React.FC<UploadModalProps> = ({
 
   const handleBrowseClick = () => browseInputRef.current?.click();
 
-  const handleBrowseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBrowseChange = (e) => {
     if (e.target.files && e.target.files[0]) selectFile(e.target.files[0]);
   };
 

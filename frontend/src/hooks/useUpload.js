@@ -1,33 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { API_BASE_URL } from '../config';
 
-export type UploadPhase =
-  | 'idle'
-  | 'preview'
-  | 'uploading'
-  | 'parsing'
-  | 'chunking'
-  | 'embedding'
-  | 'success'
-  | 'error';
-
-export interface UploadResult {
-  filename: string;
-  collection_name: string;
-  chunks_stored: number;
-  status: string;
-}
-
 export function useUpload() {
-  const [phase, setPhase] = useState<UploadPhase>('idle');
-  const [file, setFile] = useState<File | null>(null);
+  const [phase, setPhase] = useState('idle');
+  const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [overallProgress, setOverallProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<UploadResult | null>(null);
+  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
 
-  const xhrRef = useRef<XMLHttpRequest | null>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const xhrRef = useRef(null);
+  const timerRef = useRef(null);
   const serverDoneRef = useRef(false);
 
   const cleanup = useCallback(() => {
@@ -52,7 +35,7 @@ export function useUpload() {
     setResult(null);
   }, [cleanup]);
 
-  const selectFile = useCallback((f: File) => {
+  const selectFile = useCallback((f) => {
     const ext = f.name.split('.').pop()?.toLowerCase();
     if (!ext || !['pdf', 'txt', 'md'].includes(ext)) {
       setFile(f);
@@ -128,7 +111,7 @@ export function useUpload() {
 
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
-          const res: UploadResult = JSON.parse(xhr.responseText);
+          const res = JSON.parse(xhr.responseText);
           setResult(res);
           setOverallProgress(100);
           setPhase('success');

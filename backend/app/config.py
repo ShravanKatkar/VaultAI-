@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     LLM_MODEL: str = Field(default="llama3-8b-8192")
     USE_GROQ: bool = Field(default=False)
     GROQ_API_KEY: str = Field(default="")
+    CORS_ALLOWED_ORIGINS: str = Field(default="http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,https://vault-ai-gamma.vercel.app")
 
     class Config:
         # Load from .env at current working dir or parent

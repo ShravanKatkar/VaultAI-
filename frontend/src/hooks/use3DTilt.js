@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
-export function use3DTilt<T extends HTMLElement = HTMLDivElement>() {
-  const ref = useRef<T>(null);
+export function use3DTilt() {
+  const ref = useRef(null);
 
   useEffect(() => {
     const el = ref.current;
@@ -12,7 +12,7 @@ export function use3DTilt<T extends HTMLElement = HTMLDivElement>() {
     const originalTransition = el.style.transition;
     const originalBackgroundImage = el.style.backgroundImage;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = (e) => {
       const rect = el.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;

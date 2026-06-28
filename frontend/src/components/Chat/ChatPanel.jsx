@@ -1,54 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Square, BookOpen, Database, Cpu, HelpCircle } from 'lucide-react';
+import { Send, Square, BookOpen, Database, Cpu } from 'lucide-react';
 import { use3DTilt } from '../../hooks/use3DTilt';
 import { API_BASE_URL } from '../../config';
-
-// --- Type Definitions ---
-export interface SourceChunk {
-  source: string;
-  page: number;
-  content_preview: string;
-}
-
-export interface PerformanceMetrics {
-  ttft: number; // Time to first token (ms)
-  tokensPerSec: number; // Tokens per second (avg)
-  throughputHistory: number[]; // Speed samples over time for sparkline
-  totalTime: number; // Total retrieval/generation time (ms)
-  totalTokens: number; // Total tokens generated (estimated)
-}
-
-export interface Message {
-  id: string;
-  sender: 'user' | 'assistant';
-  text: string;
-  streaming?: boolean;
-  sources?: SourceChunk[];
-  perf?: PerformanceMetrics;
-}
-
-export interface Collection {
-  collection_name: string;
-  filename: string;
-  chunk_count: number;
-  uploaded_at?: string;
-}
-
-export interface ChatPanelProps {
-  collections: Collection[];
-  selectedCollection: string;
-  selectedModel: string;
-  settings: {
-    temperature: number;
-    chunkSize: number;
-    topK: number;
-  };
-}
 
 // --- Local Helpers ---
 
 // A simple high-fidelity local code block syntax highlighter using single-pass tokenization
-function highlightCode(code: string, language: string): string {
+function highlightCode(code, language) {
   if (!code) return '';
   
   // Escape HTML tags first
@@ -81,7 +39,7 @@ function highlightCode(code: string, language: string): string {
 }
 
 // Generate the SVG path for the throughput sparkline
-function generateSparklinePath(history: number[]): string {
+function generateSparklinePath(history) {
   if (!history || history.length < 2) return 'M 0 10 L 60 10';
   
   const width = 60;
@@ -113,7 +71,7 @@ function generateSparklinePath(history: number[]): string {
 // --- Sub-components ---
 
 // Single copyable syntax-highlighted code block
-const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, code }) => {
+const CodeBlock = ({ language, code }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -193,13 +151,7 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
 };
 
 // Inline Markdown Parser Component
-interface CustomMarkdownProps {
-  text: string;
-  streaming?: boolean;
-  cursorClass?: string;
-}
-
-const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ text, streaming, cursorClass }) => {
+const CustomMarkdown = ({ text, streaming, cursorClass }) => {
   if (!text) {
     if (streaming) {
       return (
@@ -221,15 +173,15 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ text, streaming, cursor
     h2: { fontSize: '1.2rem', fontWeight: '600', color: '#fff', marginTop: '1rem', marginBottom: '0.5rem' },
     h3: { fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-secondary)', marginTop: '0.75rem', marginBottom: '0.25rem' },
     p: { marginBottom: '0.75rem', lineHeight: '1.6', color: 'var(--text-primary)' },
-    ul: { marginLeft: '1.5rem', marginBottom: '0.75rem', listStyleType: 'disc' as const },
-    ol: { marginLeft: '1.5rem', marginBottom: '0.75rem', listStyleType: 'decimal' as const },
+    ul: { marginLeft: '1.5rem', marginBottom: '0.75rem', listStyleType: 'disc' },
+    ol: { marginLeft: '1.5rem', marginBottom: '0.75rem', listStyleType: 'decimal' },
     li: { marginBottom: '0.25rem', lineHeight: '1.5' },
     inlineCode: { fontFamily: 'var(--font-mono, monospace)', backgroundColor: 'rgba(255, 255, 255, 0.08)', padding: '2px 6px', borderRadius: '4px', fontSize: '0.9em', color: 'var(--accent-teal)', border: '1px solid rgba(255, 255, 255, 0.05)' },
     bold: { fontWeight: '700', color: '#fff' },
     italic: { fontStyle: 'italic' }
   };
 
-  const parseInline = (inlineText: string, appendCursor: boolean) => {
+  const parseInline = (inlineText, appendCursor) => {
     // Split by inline code, bold, italic
     const regex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_)/g;
     const parts = inlineText.split(regex);
@@ -259,7 +211,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ text, streaming, cursor
     );
   };
 
-  const parseTextBlocks = (blockText: string, segmentIdx: number, isLastSegment: boolean) => {
+  const parseTextBlocks = (blockText, segmentIdx, isLastSegment) => {
     const blocks = blockText.split(/\n\n+/);
 
     return blocks.map((block, blockIdx) => {
@@ -389,7 +341,7 @@ const CustomMarkdown: React.FC<CustomMarkdownProps> = ({ text, streaming, cursor
 };
 
 // Assistant Message Bubble with local fading cursor management
-const AssistantBubble: React.FC<{ message: Message }> = ({ message }) => {
+const AssistantBubble = ({ message }) => {
   const [showCursor, setShowCursor] = useState(message.streaming);
   const [cursorClass, setCursorClass] = useState('active');
 
@@ -537,8 +489,8 @@ export default function ChatPanel({
   selectedCollection,
   selectedModel,
   settings,
-}: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
+}) {
+  const [messages, setMessages] = useState([
     {
       id: 'welcome',
       sender: 'assistant',
@@ -548,12 +500,12 @@ export default function ChatPanel({
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   // 3D Tilt hook for the empty state card
-  const emptyTiltRef = use3DTilt<HTMLDivElement>(2);
+  const emptyTiltRef = use3DTilt(2);
 
   // Auto-scroll messages list to bottom
   useEffect(() => {
@@ -582,13 +534,13 @@ export default function ChatPanel({
       abortControllerRef.current.abort();
       setStreaming(false);
       setMessages(prev => prev.map(msg => 
-        msg.streaming ? { ...msg, streaming: false } : msg
+          msg.streaming ? { ...msg, streaming: false } : msg
       ));
     }
   };
 
   // Handle Query Submission
-  const handleSendQuery = async (queryText: string) => {
+  const handleSendQuery = async (queryText) => {
     if (!queryText.trim() || streaming || !selectedCollection) return;
 
     setInput('');
@@ -597,10 +549,10 @@ export default function ChatPanel({
     }
 
     const userMsgId = Date.now().toString();
-    const userMsg: Message = { id: userMsgId, sender: 'user', text: queryText.trim() };
+    const userMsg = { id: userMsgId, sender: 'user', text: queryText.trim() };
     
     const assistantMsgId = (Date.now() + 1).toString();
-    const assistantMsg: Message = { 
+    const assistantMsg = { 
       id: assistantMsgId, 
       sender: 'assistant', 
       text: '', 
@@ -622,9 +574,9 @@ export default function ChatPanel({
     abortControllerRef.current = controller;
 
     const startTime = performance.now();
-    let firstTokenTime: number | null = null;
+    let firstTokenTime = null;
     let accumulatedText = '';
-    const rates: number[] = [];
+    const rates = [];
     let lastPushTime = 0;
 
     try {
@@ -645,7 +597,7 @@ export default function ChatPanel({
       }
 
       // Read sources from header
-      let sources: SourceChunk[] = [];
+      let sources = [];
       const sourcesHeader = response.headers.get('X-Sources');
       if (sourcesHeader) {
         try {
@@ -732,7 +684,7 @@ export default function ChatPanel({
           : msg
       ));
 
-    } catch (err: any) {
+    } catch (err) {
       if (err.name === 'AbortError') {
         console.log('Streaming aborted by user.');
       } else {

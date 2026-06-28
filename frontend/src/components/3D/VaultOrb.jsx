@@ -2,9 +2,9 @@ import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-function OrbMesh({ isHovered }: { isHovered: boolean }) {
-  const outerRef = useRef<THREE.Mesh>(null);
-  const innerRef = useRef<THREE.Mesh>(null);
+function OrbMesh({ isHovered }) {
+  const outerRef = useRef(null);
+  const innerRef = useRef(null);
 
   useFrame(() => {
     const speedMultiplier = isHovered ? 2.67 : 1.0; // 0.003 * 2.67 ≈ 0.008
@@ -48,11 +48,7 @@ function OrbMesh({ isHovered }: { isHovered: boolean }) {
   );
 }
 
-interface VaultOrbProps {
-  size?: number;
-}
-
-export const VaultOrb: React.FC<VaultOrbProps> = ({ size = 300 }) => {
+export const VaultOrb = ({ size = 300 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (

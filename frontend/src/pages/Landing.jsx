@@ -4,6 +4,7 @@ import { use3DTilt } from '../hooks/use3DTilt';
 import { VaultOrb } from '../components/3D/VaultOrb';
 import { Aurora } from '../components/3D/Aurora';
 import { RAGFlow } from '../components/3D/RAGFlow';
+
 const IconBrandGithub = ({ size = 18 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
@@ -35,22 +36,9 @@ const IconLock = ({ size = 24, style = {} }) => (
   </svg>
 );
 
-interface LandingProps {
-  onLaunch: () => void;
-}
-
 // Particle class for the canvas background
 class Particle {
-  x: number = 0;
-  y: number = 0;
-  vx: number = 0;
-  vy: number = 0;
-  color: string = '';
-  radius: number = 0;
-  width: number = 0;
-  height: number = 0;
-
-  constructor(width: number, height: number) {
+  constructor(width, height) {
     this.width = width;
     this.height = height;
     this.reset();
@@ -76,7 +64,7 @@ class Particle {
     if (this.y < 0 || this.y > this.height) this.vy *= -1;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx) {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = this.color;
@@ -85,8 +73,8 @@ class Particle {
 }
 
 // Canvas Particle System Component
-const ParticleBackground: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const ParticleBackground = () => {
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -95,8 +83,8 @@ const ParticleBackground: React.FC = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animationFrameId: number;
-    let particles: Particle[] = [];
+    let animationFrameId;
+    let particles = [];
     const particleCount = 150;
 
     const resizeCanvas = () => {
@@ -170,17 +158,7 @@ const ParticleBackground: React.FC = () => {
   );
 };
 
-// Counter Stats Card Component using Intersection Observer
-interface StatCardProps {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  label: string;
-  subtext: string;
-  targetValue: number;
-  valueSuffix: string;
-  glowColor: string;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ 
+const StatCard = ({ 
   icon: Icon, 
   label, 
   subtext, 
@@ -188,9 +166,9 @@ const StatCard: React.FC<StatCardProps> = ({
   valueSuffix, 
   glowColor 
 }) => {
-  const [count, setCount] = useState<number>(0);
-  const [animated, setAnimated] = useState<boolean>(false);
-  const cardRef = use3DTilt<HTMLDivElement>();
+  const [count, setCount] = useState(0);
+  const [animated, setAnimated] = useState(false);
+  const cardRef = use3DTilt();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -227,7 +205,7 @@ const StatCard: React.FC<StatCardProps> = ({
       observer.observe(cardRef.current);
     }
     return () => observer.disconnect();
-  }, [targetValue, animated]);
+  }, [targetValue, animated, cardRef]);
 
   // Pass custom CSS variable for glow color
   const glowStyle = {
@@ -243,7 +221,7 @@ const StatCard: React.FC<StatCardProps> = ({
     transition: 'all 300ms ease',
     position: 'relative',
     minWidth: '220px',
-  } as React.CSSProperties;
+  };
 
   return (
     <div 
@@ -288,7 +266,7 @@ const StatCard: React.FC<StatCardProps> = ({
   );
 };
 
-export const Landing: React.FC<LandingProps> = ({ onLaunch }) => {
+export const Landing = ({ onLaunch }) => {
   const headlineWords = {
     line1: "Your documents.".split(" "),
     line2: "Your intelligence.".split(" "),
@@ -637,3 +615,5 @@ export const Landing: React.FC<LandingProps> = ({ onLaunch }) => {
     </div>
   );
 };
+
+export default Landing;

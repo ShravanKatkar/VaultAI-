@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   IconPlayerPlay, 
   IconLoader, 
@@ -7,12 +7,10 @@ import {
   IconCheck, 
   IconX, 
   IconClock, 
-  IconArrowLeft, 
   IconPlus, 
   IconTrash, 
   IconFileText, 
   IconSettings,
-  IconDatabase,
   IconArrowUpRight,
   IconArrowDownRight
 } from '@tabler/icons-react';
@@ -274,12 +272,12 @@ const MOCK_RUNS = [
   }
 ];
 
-export default function EvalDashboard({ collections, selectedCollection }: { collections: any[], selectedCollection: string }) {
-  const [runs, setRuns] = useState<any[]>(MOCK_RUNS);
-  const metricCard1Ref = use3DTilt<HTMLDivElement>();
-  const metricCard2Ref = use3DTilt<HTMLDivElement>();
-  const metricCard3Ref = use3DTilt<HTMLDivElement>();
-  const [selectedRun, setSelectedRun] = useState<any>(MOCK_RUNS[0]);
+export default function EvalDashboard({ collections, selectedCollection }) {
+  const [runs, setRuns] = useState(MOCK_RUNS);
+  const metricCard1Ref = use3DTilt();
+  const metricCard2Ref = use3DTilt();
+  const metricCard3Ref = use3DTilt();
+  const [selectedRun, setSelectedRun] = useState(MOCK_RUNS[0]);
   const [loadingRuns, setLoadingRuns] = useState(false);
   const [runningEval, setRunningEval] = useState(false);
   const [progressStage, setProgressStage] = useState('');
@@ -288,14 +286,14 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
   const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const dropdownRef = useRef(null);
+  const canvasRef = useRef(null);
   const [confettiActive, setConfettiActive] = useState(false);
 
   // Close dropdown on outside click
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setHistoryOpen(false);
       }
     }
@@ -313,7 +311,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
         if (backendRuns && backendRuns.length > 0) {
           // Fetch full details of the latest backend runs and merge with MOCK
           const detailedRuns = await Promise.all(
-            backendRuns.slice(0, 5).map(async (run: any) => {
+            backendRuns.slice(0, 5).map(async (run) => {
               try {
                 const detailRes = await fetch(`${API_BASE_URL}/eval/runs/${run.id}`);
                 if (detailRes.ok) return await detailRes.json();
@@ -346,7 +344,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
   }, []);
 
   // Relative time helper
-  const getRelativeTime = (isoString: string) => {
+  const getRelativeTime = (isoString) => {
     const runDate = new Date(isoString);
     const now = new Date();
     const diffMs = now.getTime() - runDate.getTime();
@@ -364,7 +362,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
   };
 
   // Delta calculation vs previous run
-  const getDelta = (currentVal: number, runIndex: number, field: 'hit_at_3' | 'avg_rouge_l' | 'avg_latency_ms') => {
+  const getDelta = (currentVal, runIndex, field) => {
     const prevRun = runs[runIndex + 1];
     if (!prevRun) return null;
     const prevVal = prevRun[field];
@@ -400,19 +398,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    interface Particle {
-      x: number;
-      y: number;
-      size: number;
-      color: string;
-      speedX: number;
-      speedY: number;
-      rotation: number;
-      rotationSpeed: number;
-      opacity: number;
-    }
-
-    const particles: Particle[] = [];
+    const particles = [];
     const colors = ['#7C3AED', '#0D9488', '#F59E0B', '#3B82F6', '#EC4899', '#10B981'];
 
     // Spawn 150 particles around the button (center bottom area)
@@ -439,7 +425,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
       });
     }
 
-    let animationFrameId: number;
+    let animationFrameId;
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
@@ -602,7 +588,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
     let totalWords = 0;
     let totalLatencyMs = 0;
 
-    selectedRun.results.forEach((r: any) => {
+    selectedRun.results.forEach((r) => {
       if (r.generated_answer && !r.generated_answer.startsWith("[Generation Failed")) {
         totalWords += r.generated_answer.split(/\s+/).length;
         totalLatencyMs += r.latency_ms;
@@ -616,7 +602,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
   }, [selectedRun]);
 
   // Export Results
-  const exportResults = (format: 'json' | 'csv') => {
+  const exportResults = (format) => {
     if (!selectedRun) return;
 
     let content = '';
@@ -629,7 +615,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
       mimeType = 'application/json';
     } else {
       const headers = ['Question', 'Expected Source', 'Retrieved Source 1', 'Retrieved Source 2', 'Retrieved Source 3', 'Hit', 'ROUGE-L', 'Latency (ms)', 'Generated Answer'];
-      const rows = selectedRun.results.map((r: any) => [
+      const rows = selectedRun.results.map((r) => [
         `"${r.question.replace(/"/g, '""')}"`,
         `"${r.expected_source.replace(/"/g, '""')}"`,
         `"${(r.retrieved_sources?.[0] || '').replace(/"/g, '""')}"`,
@@ -641,7 +627,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
         `"${(r.generated_answer || '').replace(/"/g, '""')}"`
       ]);
 
-      content = [headers.join(','), ...rows.map((row: any) => row.join(','))].join('\n');
+      content = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
       fileName += '.csv';
       mimeType = 'text/csv';
     }
@@ -659,7 +645,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
   // Process data for Recharts Graph
   const chartData = useMemo(() => {
     if (!selectedRun?.results) return [];
-    return selectedRun.results.map((r: any, idx: number) => ({
+    return selectedRun.results.map((r, idx) => ({
       name: `Q${idx + 1}`,
       latency: parseFloat((r.latency_ms / 1000).toFixed(2)),
       question: r.question,
@@ -675,15 +661,15 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
     setTestCases([...testCases, { question: '', expected_source: '', ground_truth: '' }]);
   };
 
-  const handleRemoveTestCase = (index: number) => {
+  const handleRemoveTestCase = (index) => {
     const updated = [...testCases];
     updated.splice(index, 1);
     setTestCases(updated);
   };
 
-  const handleTestCaseChange = (index: number, field: string, value: string) => {
+  const handleTestCaseChange = (index, field, value) => {
     const updated = [...testCases];
-    (updated[index] as any)[field] = value;
+    updated[index][field] = value;
     setTestCases(updated);
   };
 
@@ -796,7 +782,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
 
           {/* Test Case Builder Toggle */}
           <button 
-            className={`btn ${showConfig ? 'btn-secondary' : 'btn-secondary'}`}
+            className="btn btn-secondary"
             onClick={() => setShowConfig(!showConfig)}
             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}
           >
@@ -1262,7 +1248,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedRun.results.map((result: any, idx: number) => {
+                  {selectedRun.results.map((result, idx) => {
                     const isSelected = selectedCaseIndex === idx;
                     const latencyS = result.latency_ms / 1000;
                     
@@ -1401,7 +1387,7 @@ export default function EvalDashboard({ collections, selectedCollection }: { col
                 <div className="eval-diff-content" style={{ fontSize: '13px' }}>
                   {selectedRun.results[selectedCaseIndex].retrieved_sources && selectedRun.results[selectedCaseIndex].retrieved_sources.length > 0 ? (
                     <ol style={{ paddingLeft: '16px', margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {selectedRun.results[selectedCaseIndex].retrieved_sources.map((src: string, i: number) => {
+                      {selectedRun.results[selectedCaseIndex].retrieved_sources.map((src, i) => {
                         const isMatch = src.trim().toLowerCase() === selectedRun.results[selectedCaseIndex].expected_source.trim().toLowerCase();
                         return (
                           <li key={i} style={{ 

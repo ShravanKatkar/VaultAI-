@@ -13,6 +13,7 @@ try:
     from contextlib import asynccontextmanager
     from fastapi import FastAPI, Request
     from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.staticfiles import StaticFiles
     import chromadb
 
     from app.config import settings
@@ -75,24 +76,41 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Enable CORS for localhost:3000
+# Enable CORS for configured origins
+allowed_origins = [origin.strip() for origin in settings.CORS_ALLOWED_ORIGINS.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Timing middleware to record and add X-Response-Time header
+# Timing & Private Network Access (PNA) middleware
 @app.middleware("http")
-async def add_timing_middleware(request: Request, call_next):
+async def add_timing_and_pna_middleware(request: Request, call_next):
     start_time = time.perf_counter()
     response = await call_next(request)
     duration_ms = (time.perf_counter() - start_time) * 1000
     response.headers["X-Response-Time"] = f"{duration_ms:.2f}ms"
+    
+    # Allow Chrome's Private Network Access preflight checks
+    if "access-control-request-private-network" in request.headers:
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+        
     return response
 
 # Include endpoint routers
 app.include_router(api_router)
 app.include_router(eval_router, prefix="/eval")
+
+# Mount frontend build directory to serve static assets
+base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+frontend_dist = os.path.join(base_dir, "frontend", "dist")
+
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+    print(f"[Startup] Mounted frontend static files from: {frontend_dist}")
+else:
+    print(f"[Startup] Warning: Frontend build folder not found at {frontend_dist}. FastAPI will not serve static files.")

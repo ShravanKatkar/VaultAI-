@@ -56,7 +56,7 @@ const RAG_FLOW_STYLES = `
   }
 `;
 
-export const RAGFlow: React.FC = () => {
+export const RAGFlow = () => {
   return (
     <div className="glass-panel" style={{
       width: '100%',

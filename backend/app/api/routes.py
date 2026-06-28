@@ -299,16 +299,81 @@ async def list_models():
         raise HTTPException(status_code=500, detail=f"Ollama connection error: {e}")
 
 @router.get("/chat/suggestions")
-async def chat_suggestions():
+async def chat_suggestions(collection_name: str = None):
     """
-    Returns standard recommended prompts for the secure chat interface.
+    Returns standard or document-specific recommended prompts for the secure chat interface.
     """
-    return [
-        "Explain the database schema of VaultAI.",
-        "What are the targeted query response latencies?",
-        "How is security maintained in local embeddings?",
-        "What models are supported by local Ollama?"
+    default_suggestions = [
+        "What are the key requirements outlined in this document?",
+        "Can you summarize the main findings or objectives?",
+        "Detail any specific action items or recommendations.",
+        "What is the overall timeline or schedule mentioned?"
     ]
+    
+    if not collection_name:
+        return default_suggestions
+        
+    try:
+        chroma_client = chromadb.PersistentClient(path=settings.CHROMA_PATH)
+        existing_collections = [c.name for c in chroma_client.list_collections()]
+        if collection_name not in existing_collections:
+            return default_suggestions
+            
+        col = chroma_client.get_collection(collection_name)
+        count = col.count()
+        if count == 0:
+            return default_suggestions
+            
+        # Fetch the first 2 chunks to analyze content
+        results = col.get(limit=2)
+        documents = results.get("documents", [])
+        metadatas = results.get("metadatas", [])
+        
+        filename = "this document"
+        if metadatas and len(metadatas) > 0:
+            filename = metadatas[0].get("source", "this document")
+            
+        if not documents:
+            return [
+                f"Summarize the key points of {filename}.",
+                f"What are the main findings in {filename}?",
+                f"List the core objectives described in {filename}."
+            ]
+            
+        # Analyze content to build realistic questions
+        combined_text = " ".join(documents)
+        
+        suggestions = []
+        
+        # 1. Look for technical specifications or architectures
+        if any(w in combined_text.lower() for w in ["architect", "system", "database", "database schema", "chromadb", "sqlite", "server"]):
+            suggestions.append(f"What details are provided about the system architecture or database in {filename}?")
+        else:
+            suggestions.append(f"Summarize the main sections and structure of {filename}.")
+            
+        # 2. Look for financial figures, targets, or goals
+        if any(w in combined_text.lower() for w in ["revenue", "cost", "dollar", "percent", "%", "target", "milestone", "fund"]):
+            suggestions.append(f"What are the key performance metrics or financial targets mentioned in {filename}?")
+        else:
+            suggestions.append(f"What are the core goals and objectives discussed in {filename}?")
+            
+        # 3. Look for contact details, persons, roles
+        if any(w in combined_text.lower() for w in ["contact", "lead", "architect", "manager", "director", "coordinator", "officer", "person", "founder"]):
+            suggestions.append(f"Who are the key contact persons or roles responsible for the items in {filename}?")
+        else:
+            suggestions.append(f"Detail any specific action items or responsibilities outlined in {filename}.")
+            
+        # 4. Fallback/general question
+        suggestions.append(f"What security or operational constraints are mentioned in {filename}?")
+        
+        # Ensure we have at least 3-4 suggestions
+        while len(suggestions) < 3:
+            suggestions.append(f"What are the key takeaways from {filename}?")
+            
+        return suggestions[:4]
+    except Exception as e:
+        print(f"[Suggestions] Error generating custom questions: {e}")
+        return default_suggestions
 
 @router.get("/stats/tech_stack")
 async def tech_stack():

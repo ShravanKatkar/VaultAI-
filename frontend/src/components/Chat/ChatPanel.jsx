@@ -506,13 +506,17 @@ export default function ChatPanel({
   ]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/chat/suggestions`)
+    const url = selectedCollection 
+      ? `${API_BASE_URL}/chat/suggestions?collection_name=${encodeURIComponent(selectedCollection)}`
+      : `${API_BASE_URL}/chat/suggestions`;
+
+    fetch(url)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && Array.isArray(data)) setSuggestions(data);
       })
       .catch(() => {});
-  }, []);
+  }, [selectedCollection]);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);

@@ -499,6 +499,20 @@ export default function ChatPanel({
   ]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
+  const [suggestions, setSuggestions] = useState([
+    'Summarize this document',
+    'What are the key findings?',
+    'List all action items'
+  ]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/chat/suggestions`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data)) setSuggestions(data);
+      })
+      .catch(() => {});
+  }, []);
 
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -859,7 +873,7 @@ export default function ChatPanel({
                 Quick Suggestions
               </div>
               
-              {['Summarize this document', 'What are the key findings?', 'List all action items'].map((text, idx) => (
+              {suggestions.map((text, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSendQuery(text)}

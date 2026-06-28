@@ -4,6 +4,7 @@ import { use3DTilt } from '../hooks/use3DTilt';
 import { VaultOrb } from '../components/3D/VaultOrb';
 import { Aurora } from '../components/3D/Aurora';
 import { RAGFlow } from '../components/3D/RAGFlow';
+import { API_BASE_URL } from '../config';
 
 const IconBrandGithub = ({ size = 18 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -267,6 +268,37 @@ const StatCard = ({
 };
 
 export const Landing = ({ onLaunch }) => {
+  const [techStack, setTechStack] = useState([
+    { name: 'Ollama', color: '#FF8A00' },
+    { name: 'LangChain', color: '#12C2E9' },
+    { name: 'ChromaDB', color: '#F64F59' },
+    { name: 'FastAPI', color: '#009688' },
+    { name: 'React', color: '#61DAFB' },
+    { name: 'TypeScript', color: '#3178C6' },
+    { name: 'Docker', color: '#2496ED' }
+  ]);
+  const [systemStats, setSystemStats] = useState({
+    offline_pct: 100,
+    latency_s: 2,
+    data_shared: 0
+  });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/stats/tech_stack`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data)) setTechStack(data);
+      })
+      .catch(() => {});
+
+    fetch(`${API_BASE_URL}/stats/system`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setSystemStats(data);
+      })
+      .catch(() => {});
+  }, []);
+
   const headlineWords = {
     line1: "Your documents.".split(" "),
     line2: "Your intelligence.".split(" "),
@@ -294,16 +326,6 @@ export const Landing = ({ onLaunch }) => {
       }
     }
   };
-
-  const techStack = [
-    { name: 'Ollama', color: '#FF8A00' },
-    { name: 'LangChain', color: '#12C2E9' },
-    { name: 'ChromaDB', color: '#F64F59' },
-    { name: 'FastAPI', color: '#009688' },
-    { name: 'React', color: '#61DAFB' },
-    { name: 'TypeScript', color: '#3178C6' },
-    { name: 'Docker', color: '#2496ED' }
-  ];
 
   return (
     <div 
@@ -489,7 +511,7 @@ export const Landing = ({ onLaunch }) => {
               icon={IconWifiOff} 
               label="100% Offline" 
               subtext="Zero network calls, fully local vector operations" 
-              targetValue={100} 
+              targetValue={systemStats.offline_pct} 
               valueSuffix="%" 
               glowColor="#10B981" 
             />
@@ -497,7 +519,7 @@ export const Landing = ({ onLaunch }) => {
               icon={IconBolt} 
               label="Instant Performance" 
               subtext="Optimized parallel chunks retrieval" 
-              targetValue={2} 
+              targetValue={systemStats.latency_s} 
               valueSuffix="s" 
               glowColor="#F59E0B" 
             />
@@ -505,7 +527,7 @@ export const Landing = ({ onLaunch }) => {
               icon={IconLock} 
               label="Data Shared" 
               subtext="Your secure documents never leave this device" 
-              targetValue={0} 
+              targetValue={systemStats.data_shared} 
               valueSuffix="" 
               glowColor="#8B5CF6" 
             />

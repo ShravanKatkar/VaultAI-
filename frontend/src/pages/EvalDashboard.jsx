@@ -27,262 +27,17 @@ import {
 import { use3DTilt } from '../hooks/use3DTilt';
 import { API_BASE_URL } from '../config';
 
-// Default 15 test cases covering RAG capabilities
-const DEFAULT_TEST_CASES = [
-  {
-    question: "What are the key technical requirements outlined in this document?",
-    expected_source: "quarterly_report.pdf",
-    ground_truth: "The key technical requirements include migration to a distributed offline database, integration with Ollama for secure local processing, and maintaining low-latency response times under 500ms."
-  },
-  {
-    question: "Who is the primary contact person for this integration project?",
-    expected_source: "quarterly_report.pdf",
-    ground_truth: "The primary contact for the project integration is Sarah Connor, lead architect in the private AI infrastructure division."
-  },
-  {
-    question: "What is the system architecture of VaultAI?",
-    expected_source: "architecture_specs.pdf",
-    ground_truth: "VaultAI uses a completely offline RAG architecture combining ChromaDB for local vector storage, Ollama for local LLM inference, and an encrypted client vault for document ingestion."
-  },
-  {
-    question: "How does the offline vector storage handle duplicate documents?",
-    expected_source: "architecture_specs.pdf",
-    ground_truth: "Duplicate documents are skipped during embedding storage by computing SHA-256 hashes of the file chunks and matching them against existing vector metadata."
-  },
-  {
-    question: "What database is used for storing evaluation runs?",
-    expected_source: "evaluation_guide.md",
-    ground_truth: "Evaluation runs are stored locally using a lightweight SQLite database (eval_results.db) with a table schema containing run details and raw results serialized to JSON."
-  },
-  {
-    question: "What metadata is extracted from uploaded PDF files?",
-    expected_source: "quarterly_report.pdf",
-    ground_truth: "ChromaDB stores the document source filename, total chunk count, chunk index, SHA-256 hash, and the ISO timestamp of upload time."
-  },
-  {
-    question: "What is the default chunk size for document ingestion?",
-    expected_source: "architecture_specs.pdf",
-    ground_truth: "The default ingestion setting is a chunk size of 512 tokens with a chunk overlap of 64 tokens for optimal retrieval coverage."
-  },
-  {
-    question: "Which LLM models are supported by the VaultAI offline system?",
-    expected_source: "ollama_config.json",
-    ground_truth: "VaultAI officially supports Llama3 (8B), Mistral (7B), and Phi-3 (3.8B) running locally via the Ollama server."
-  },
-  {
-    question: "How is document security maintained during processing?",
-    expected_source: "quarterly_report.pdf",
-    ground_truth: "Security is maintained by ensuring 0% external network calls. All tokenization, embedding generation, and model inference run inside the local container environment."
-  },
-  {
-    question: "What are the latency targets for retrieval queries?",
-    expected_source: "architecture_specs.pdf",
-    ground_truth: "Retrieval search queries are targeted to return results in under 50ms, while end-to-end local generation responses are targeted under 2.5 seconds."
-  },
-  {
-    question: "Who is the lead architect for the private AI infrastructure?",
-    expected_source: "quarterly_report.pdf",
-    ground_truth: "Sarah Connor serves as the Lead Architect in the private AI infrastructure division."
-  },
-  {
-    question: "What embedding model is used for generating vectors?",
-    expected_source: "architecture_specs.pdf",
-    ground_truth: "VaultAI uses the 'nallg-embed-text-v1.5' local model, generating 768-dimensional dense vectors stored directly in ChromaDB."
-  },
-  {
-    question: "What is the structure of the eval_runs database table?",
-    expected_source: "evaluation_guide.md",
-    ground_truth: "The eval_runs table contains columns: id (INTEGER PRIMARY KEY), run_at (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), collection_name (TEXT), hit_at_3 (REAL), avg_rouge_l (REAL), avg_latency_ms (REAL), and results_json (TEXT)."
-  },
-  {
-    question: "What libraries are used for calculating the generation quality metrics?",
-    expected_source: "evaluation_guide.md",
-    ground_truth: "The backend uses NLTK and custom tokenization functions in Python to compute the LCS (Longest Common Subsequence) representing the ROUGE-L F1 score."
-  },
-  {
-    question: "How do you clear or delete a document vault collection?",
-    expected_source: "evaluation_guide.md",
-    ground_truth: "Collections are deleted via a DELETE request to /documents/{collection_name}, which triggers ChromaDB's delete_collection API and releases local disk space."
-  }
-];
-
-// 10 Mock Runs to seed the history dropdown (looks premium & provides immediate visualization)
-const MOCK_RUNS = [
-  {
-    id: 10,
-    run_at: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 min ago
-    collection_name: "architecture_specs",
-    hit_at_3: 0.867,
-    avg_rouge_l: 0.742,
-    avg_latency_ms: 2120,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: idx % 4 === 0 
-        ? "[Generation Failed: Connection timeout to local Ollama]" 
-        : tc.ground_truth.slice(0, Math.floor(tc.ground_truth.length * (0.6 + Math.random() * 0.4))),
-      retrieved_sources: idx % 6 === 0 ? ["other_doc.txt", "notes.md"] : [tc.expected_source, "notes.md"],
-      hit: idx % 6 === 0 ? 0.0 : 1.0,
-      rouge_l: idx % 4 === 0 ? 0.0 : 0.65 + Math.random() * 0.3,
-      latency_ms: 1200 + Math.random() * 2000
-    }))
-  },
-  {
-    id: 9,
-    run_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
-    collection_name: "architecture_specs",
-    hit_at_3: 0.800,
-    avg_rouge_l: 0.718,
-    avg_latency_ms: 2280,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, Math.floor(tc.ground_truth.length * 0.7)),
-      retrieved_sources: idx % 5 === 0 ? ["other_doc.txt"] : [tc.expected_source],
-      hit: idx % 5 === 0 ? 0.0 : 1.0,
-      rouge_l: 0.55 + Math.random() * 0.35,
-      latency_ms: 1500 + Math.random() * 1800
-    }))
-  },
-  {
-    id: 8,
-    run_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-    collection_name: "quarterly_report",
-    hit_at_3: 0.889,
-    avg_rouge_l: 0.755,
-    avg_latency_ms: 2010,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, Math.floor(tc.ground_truth.length * 0.85)),
-      retrieved_sources: idx % 7 === 0 ? [] : [tc.expected_source],
-      hit: idx % 7 === 0 ? 0.0 : 1.0,
-      rouge_l: 0.72 + Math.random() * 0.25,
-      latency_ms: 1000 + Math.random() * 2000
-    }))
-  },
-  {
-    id: 7,
-    run_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-    collection_name: "quarterly_report",
-    hit_at_3: 0.833,
-    avg_rouge_l: 0.710,
-    avg_latency_ms: 2450,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, Math.floor(tc.ground_truth.length * 0.7)),
-      retrieved_sources: idx % 6 === 0 ? [] : [tc.expected_source],
-      hit: idx % 6 === 0 ? 0.0 : 1.0,
-      rouge_l: 0.5 + Math.random() * 0.4,
-      latency_ms: 1300 + Math.random() * 2500
-    }))
-  },
-  {
-    id: 6,
-    run_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-    collection_name: "evaluation_guide",
-    hit_at_3: 0.800,
-    avg_rouge_l: 0.702,
-    avg_latency_ms: 2520,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, Math.floor(tc.ground_truth.length * 0.65)),
-      retrieved_sources: idx % 5 === 0 ? [] : [tc.expected_source],
-      hit: idx % 5 === 0 ? 0.0 : 1.0,
-      rouge_l: 0.45 + Math.random() * 0.45,
-      latency_ms: 1200 + Math.random() * 2800
-    }))
-  },
-  {
-    id: 5,
-    run_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-    collection_name: "evaluation_guide",
-    hit_at_3: 0.867,
-    avg_rouge_l: 0.738,
-    avg_latency_ms: 2180,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth,
-      retrieved_sources: [tc.expected_source],
-      hit: 1.0,
-      rouge_l: 0.6 + Math.random() * 0.35,
-      latency_ms: 1100 + Math.random() * 2200
-    }))
-  },
-  {
-    id: 4,
-    run_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week ago
-    collection_name: "architecture_specs",
-    hit_at_3: 0.840,
-    avg_rouge_l: 0.715,
-    avg_latency_ms: 2310,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, 100),
-      retrieved_sources: [tc.expected_source],
-      hit: 1.0,
-      rouge_l: 0.5 + Math.random() * 0.3,
-      latency_ms: 1400 + Math.random() * 2000
-    }))
-  },
-  {
-    id: 3,
-    run_at: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), // 2 weeks ago
-    collection_name: "architecture_specs",
-    hit_at_3: 0.820,
-    avg_rouge_l: 0.709,
-    avg_latency_ms: 2420,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, 80),
-      retrieved_sources: idx % 4 === 0 ? [] : [tc.expected_source],
-      hit: idx % 4 === 0 ? 0.0 : 1.0,
-      rouge_l: 0.4 + Math.random() * 0.4,
-      latency_ms: 1500 + Math.random() * 2200
-    }))
-  },
-  {
-    id: 2,
-    run_at: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(), // 3 weeks ago
-    collection_name: "quarterly_report",
-    hit_at_3: 0.853,
-    avg_rouge_l: 0.729,
-    avg_latency_ms: 2210,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, 120),
-      retrieved_sources: [tc.expected_source],
-      hit: 1.0,
-      rouge_l: 0.55 + Math.random() * 0.3,
-      latency_ms: 1000 + Math.random() * 2500
-    }))
-  },
-  {
-    id: 1,
-    run_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // 1 month ago
-    collection_name: "quarterly_report",
-    hit_at_3: 0.812,
-    avg_rouge_l: 0.692,
-    avg_latency_ms: 2610,
-    results: DEFAULT_TEST_CASES.map((tc, idx) => ({
-      ...tc,
-      generated_answer: tc.ground_truth.slice(0, 60),
-      retrieved_sources: idx % 3 === 0 ? [] : [tc.expected_source],
-      hit: idx % 3 === 0 ? 0.0 : 1.0,
-      rouge_l: 0.35 + Math.random() * 0.4,
-      latency_ms: 1800 + Math.random() * 2000
-    }))
-  }
-];
-
 export default function EvalDashboard({ collections, selectedCollection }) {
-  const [runs, setRuns] = useState(MOCK_RUNS);
+  const [runs, setRuns] = useState([]);
   const metricCard1Ref = use3DTilt();
   const metricCard2Ref = use3DTilt();
   const metricCard3Ref = use3DTilt();
-  const [selectedRun, setSelectedRun] = useState(MOCK_RUNS[0]);
+  const [selectedRun, setSelectedRun] = useState(null);
   const [loadingRuns, setLoadingRuns] = useState(false);
   const [runningEval, setRunningEval] = useState(false);
   const [progressStage, setProgressStage] = useState('');
   const [progressPercent, setProgressPercent] = useState(0);
-  const [testCases, setTestCases] = useState(DEFAULT_TEST_CASES);
+  const [testCases, setTestCases] = useState([]);
   const [selectedCaseIndex, setSelectedCaseIndex] = useState(0);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
@@ -301,15 +56,26 @@ export default function EvalDashboard({ collections, selectedCollection }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Fetch real runs from backend & merge with mock ones
+  // Fetch real runs from backend & merge with mock ones from python
   const fetchRuns = async () => {
     setLoadingRuns(true);
     try {
+      // 1. Fetch mock runs from Python
+      let localMockRuns = [];
+      try {
+        const mockRes = await fetch(`${API_BASE_URL}/eval/mock_runs`);
+        if (mockRes.ok) {
+          localMockRuns = await mockRes.json();
+        }
+      } catch (e) {
+        console.warn("Could not load mock runs from backend", e);
+      }
+
+      // 2. Fetch real runs from SQLite
       const response = await fetch(`${API_BASE_URL}/eval/runs`);
       if (response.ok) {
         const backendRuns = await response.json();
         if (backendRuns && backendRuns.length > 0) {
-          // Fetch full details of the latest backend runs and merge with MOCK
           const detailedRuns = await Promise.all(
             backendRuns.slice(0, 5).map(async (run) => {
               try {
@@ -323,28 +89,50 @@ export default function EvalDashboard({ collections, selectedCollection }) {
           );
           
           const filteredDetailed = detailedRuns.filter(r => r && r.results);
-          const merged = [...filteredDetailed, ...MOCK_RUNS].slice(0, 10);
+          const merged = [...filteredDetailed, ...localMockRuns].slice(0, 10);
           setRuns(merged);
           
-          // Keep current selectedRun sync'd or pick the first backend run
           if (filteredDetailed.length > 0) {
             setSelectedRun(filteredDetailed[0]);
+          } else if (localMockRuns.length > 0) {
+            setSelectedRun(localMockRuns[0]);
           }
+        } else {
+          setRuns(localMockRuns);
+          if (localMockRuns.length > 0) {
+            setSelectedRun(localMockRuns[0]);
+          }
+        }
+      } else {
+        setRuns(localMockRuns);
+        if (localMockRuns.length > 0) {
+          setSelectedRun(localMockRuns[0]);
         }
       }
     } catch (err) {
-      console.warn("Failed to fetch evaluation runs, falling back to mock historical data:", err);
+      console.warn("Failed to fetch evaluation runs:", err);
     } finally {
       setLoadingRuns(false);
     }
   };
 
+  // Load test cases and run history on mount
   useEffect(() => {
+    fetch(`${API_BASE_URL}/eval/default_test_cases`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setTestCases(data);
+        }
+      })
+      .catch(() => {});
+      
     fetchRuns();
   }, []);
 
   // Relative time helper
   const getRelativeTime = (isoString) => {
+    if (!isoString) return "";
     const runDate = new Date(isoString);
     const now = new Date();
     const diffMs = now.getTime() - runDate.getTime();
@@ -401,7 +189,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
     const particles = [];
     const colors = ['#7C3AED', '#0D9488', '#F59E0B', '#3B82F6', '#EC4899', '#10B981'];
 
-    // Spawn 150 particles around the button (center bottom area)
+    // Spawn 120 particles around the button
     const buttonElement = document.getElementById('run-eval-btn');
     let startX = canvas.width / 2;
     let startY = canvas.height * 0.7;
@@ -446,7 +234,6 @@ export default function EvalDashboard({ collections, selectedCollection }) {
           ctx.fillStyle = p.color;
           ctx.globalAlpha = Math.max(0, p.opacity);
           
-          // Draw random shapes (square or triangle)
           if (Math.random() > 0.5) {
             ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
           } else {
@@ -472,7 +259,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
     return () => cancelAnimationFrame(animationFrameId);
   };
 
-  // Simulated run stages progress
+  // Run pipeline evaluation
   const runEvaluation = async () => {
     if (!selectedCollection) {
       alert("Please select a document vault in the Secure Chat sidebar first.");
@@ -483,10 +270,9 @@ export default function EvalDashboard({ collections, selectedCollection }) {
     setProgressPercent(0);
     setProgressStage("✓ Loading test set (15 questions)");
 
-    const stepInterval = 1000; // ms per simulated question stage
+    const stepInterval = 1000;
     let currentQuestion = 1;
 
-    // Simulated question ticker
     const timer = setInterval(() => {
       if (currentQuestion <= testCases.length) {
         setProgressStage(`● Running question ${currentQuestion}/${testCases.length}...`);
@@ -510,7 +296,6 @@ export default function EvalDashboard({ collections, selectedCollection }) {
       if (response.ok) {
         const data = await response.json();
         
-        // Success stage transition
         setProgressStage("✓ Complete!");
         setProgressPercent(100);
         
@@ -522,7 +307,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
           triggerConfetti();
         }, 600);
         
-        fetchRuns(); // refresh runs list from DB
+        fetchRuns();
       } else {
         const errorData = await response.json();
         alert(errorData.detail || "Evaluation failed on backend.");
@@ -531,58 +316,12 @@ export default function EvalDashboard({ collections, selectedCollection }) {
     } catch (err) {
       clearInterval(timer);
       console.error(err);
-      
-      // FALLBACK: Simulate success locally if backend is unavailable
-      // This is crucial to keep the application 100% interactable and look premium!
-      const finishFallback = () => {
-        const simulatedResults = testCases.map((tc, idx) => {
-          const hit = Math.random() > 0.15 ? 1.0 : 0.0;
-          const rouge_l = hit > 0 ? 0.62 + Math.random() * 0.35 : 0.15 + Math.random() * 0.3;
-          const latency_ms = 800 + Math.random() * 2500;
-          
-          return {
-            ...tc,
-            generated_answer: hit > 0 
-              ? `[Simulated Generation] ${tc.ground_truth}` 
-              : "VaultAI has retrieved matching documentation but generation is simulated.",
-            retrieved_sources: hit > 0 ? [tc.expected_source, "specs.pdf"] : ["unrelated_doc.txt"],
-            hit,
-            rouge_l,
-            latency_ms
-          };
-        });
-
-        const totalHit = simulatedResults.reduce((acc, r) => acc + r.hit, 0);
-        const totalRouge = simulatedResults.reduce((acc, r) => acc + r.rouge_l, 0);
-        const totalLatency = simulatedResults.reduce((acc, r) => acc + r.latency_ms, 0);
-
-        const newRun = {
-          id: Date.now(),
-          run_at: new Date().toISOString(),
-          collection_name: selectedCollection,
-          hit_at_3: totalHit / testCases.length,
-          avg_rouge_l: totalRouge / testCases.length,
-          avg_latency_ms: totalLatency / testCases.length,
-          results: simulatedResults
-        };
-
-        setProgressStage("✓ Complete (Simulated fallback)!");
-        setProgressPercent(100);
-
-        setTimeout(() => {
-          setSelectedRun(newRun);
-          setRuns(prev => [newRun, ...prev].slice(0, 10));
-          setSelectedCaseIndex(0);
-          setRunningEval(false);
-          triggerConfetti();
-        }, 800);
-      };
-
-      finishFallback();
+      alert("Network error: Could not connect to evaluation server.");
+      setRunningEval(false);
     }
   };
 
-  // Token per second calculation (roughly 1.3 words per token)
+  // Token per second calculation
   const tokPerSec = useMemo(() => {
     if (!selectedRun?.results) return "0.0";
     let totalWords = 0;
@@ -595,48 +334,19 @@ export default function EvalDashboard({ collections, selectedCollection }) {
       }
     });
 
-    if (totalLatencyMs === 0) return "18.5"; // realistic fallback
+    if (totalLatencyMs === 0) return "18.5";
     const tokens = totalWords * 1.35;
     const latencySec = totalLatencyMs / 1000;
     return (tokens / latencySec).toFixed(1);
   }, [selectedRun]);
 
-  // Export Results
+  // Export Results via Backend file download
   const exportResults = (format) => {
     if (!selectedRun) return;
-
-    let content = '';
-    let fileName = `vaultai-eval-run-${selectedRun.id}`;
-    let mimeType = '';
-
-    if (format === 'json') {
-      content = JSON.stringify(selectedRun, null, 2);
-      fileName += '.json';
-      mimeType = 'application/json';
-    } else {
-      const headers = ['Question', 'Expected Source', 'Retrieved Source 1', 'Retrieved Source 2', 'Retrieved Source 3', 'Hit', 'ROUGE-L', 'Latency (ms)', 'Generated Answer'];
-      const rows = selectedRun.results.map((r) => [
-        `"${r.question.replace(/"/g, '""')}"`,
-        `"${r.expected_source.replace(/"/g, '""')}"`,
-        `"${(r.retrieved_sources?.[0] || '').replace(/"/g, '""')}"`,
-        `"${(r.retrieved_sources?.[1] || '').replace(/"/g, '""')}"`,
-        `"${(r.retrieved_sources?.[2] || '').replace(/"/g, '""')}"`,
-        r.hit > 0 ? '1' : '0',
-        r.rouge_l.toFixed(4),
-        r.latency_ms.toFixed(0),
-        `"${(r.generated_answer || '').replace(/"/g, '""')}"`
-      ]);
-
-      content = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
-      fileName += '.csv';
-      mimeType = 'text/csv';
-    }
-
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
+    const url = `${API_BASE_URL}/eval/export/${selectedRun.id}?format=${format}`;
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', fileName);
+    link.setAttribute('download', `vaultai-eval-run-${selectedRun.id}.${format}`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -674,7 +384,14 @@ export default function EvalDashboard({ collections, selectedCollection }) {
   };
 
   const resetTestCases = () => {
-    setTestCases(DEFAULT_TEST_CASES);
+    fetch(`${API_BASE_URL}/eval/default_test_cases`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data)) {
+          setTestCases(data);
+        }
+      })
+      .catch(() => {});
   };
 
   return (
@@ -710,7 +427,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
               onClick={() => setHistoryOpen(!historyOpen)}
               style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '8px' }}
             >
-              <span>Latest run · {getRelativeTime(selectedRun?.run_at || new Date().toISOString())}</span>
+              <span>{selectedRun ? `Run · ${getRelativeTime(selectedRun.run_at)}` : 'Loading runs...'}</span>
               <IconChevronDown size={16} style={{ transform: historyOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
             </button>
 
@@ -749,7 +466,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         borderBottom: idx < runs.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none',
-                        background: selectedRun.id === run.id ? 'rgba(124, 58, 237, 0.08)' : 'transparent',
+                        background: selectedRun?.id === run.id ? 'rgba(124, 58, 237, 0.08)' : 'transparent',
                         transition: 'background 0.2s'
                       }}
                       className="history-run-item"
@@ -1110,7 +827,6 @@ export default function EvalDashboard({ collections, selectedCollection }) {
               border: '1px solid var(--border-subtle)'
             }}>
               <div style={{ 
-                // Scale height: let 5 seconds be 100% height
                 height: `${Math.min(100, (selectedRun.avg_latency_ms / 5000) * 100)}%`, 
                 width: '100%', 
                 background: 'linear-gradient(to top, #D97706, #F59E0B)', 
@@ -1194,7 +910,6 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                     return null;
                   }}
                 />
-                {/* Horizontal reference line for average */}
                 <ReferenceLine 
                   y={parseFloat(avgLatencySec)} 
                   stroke="rgba(255, 255, 255, 0.2)" 
@@ -1252,10 +967,9 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                     const isSelected = selectedCaseIndex === idx;
                     const latencyS = result.latency_ms / 1000;
                     
-                    // Latency indicator dot color
-                    let dotColor = '#10B981'; // green < 2s
-                    if (latencyS >= 2.0 && latencyS <= 4.0) dotColor = '#F59E0B'; // amber 2-4s
-                    else if (latencyS > 4.0) dotColor = '#EF4444'; // red > 4s
+                    let dotColor = '#10B981';
+                    if (latencyS >= 2.0 && latencyS <= 4.0) dotColor = '#F59E0B';
+                    else if (latencyS > 4.0) dotColor = '#EF4444';
 
                     return (
                       <tr 

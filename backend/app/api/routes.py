@@ -297,3 +297,42 @@ async def list_models():
     except Exception as e:
         print(f"[API] Error listing Ollama models: {e}")
         raise HTTPException(status_code=500, detail=f"Ollama connection error: {e}")
+
+@router.get("/chat/suggestions")
+async def chat_suggestions():
+    """
+    Returns standard recommended prompts for the secure chat interface.
+    """
+    return [
+        "Explain the database schema of VaultAI.",
+        "What are the targeted query response latencies?",
+        "How is security maintained in local embeddings?",
+        "What models are supported by local Ollama?"
+    ]
+
+@router.get("/stats/tech_stack")
+async def tech_stack():
+    """
+    Returns the marquee metadata of technology integrations.
+    """
+    return [
+        {"name": "Ollama", "color": "#FF8A00"},
+        {"name": "LangChain", "color": "#12C2E9"},
+        {"name": "ChromaDB", "color": "#F64F59"},
+        {"name": "FastAPI", "color": "#009688"},
+        {"name": "React", "color": "#61DAFB"},
+        {"name": "TypeScript", "color": "#3178C6"},
+        {"name": "Docker", "color": "#2496ED"}
+    ]
+
+@router.get("/stats/system")
+async def system_stats():
+    """
+    Returns numeric stats representing the RAG operational metrics.
+    """
+    return {
+        "offline_pct": 100,
+        "latency_s": 2,
+        "data_shared": 0
+    }
+

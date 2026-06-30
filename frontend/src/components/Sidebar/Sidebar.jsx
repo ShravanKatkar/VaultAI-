@@ -6,11 +6,11 @@ import { API_BASE_URL } from '../../config';
 
 // Inline Tabler-equivalent SVG Icons
 const IconVault = ({ size = 20, color = 'currentColor', className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 9v6M9 12h6" />
-    <path d="M18 6h.01M18 18h.01M6 6h.01M6 18h.01" />
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+    <path d="M8 8l4 8 4-8" />
+    <path d="M10 12h4" strokeWidth="2" />
+    <circle cx="12" cy="9.5" r="1.5" fill={color} />
   </svg>
 );
 
@@ -69,7 +69,16 @@ const IconLoader2 = ({ size = 16, className = "" }) => (
   </svg>
 );
 
+const IconClose = ({ size = 20, color = 'currentColor', className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
 export const Sidebar = ({
+  isOpen,
+  onClose,
   collections,
   selectedCollection,
   setSelectedCollection,
@@ -255,7 +264,7 @@ export const Sidebar = ({
     if (ext === 'pdf') return { color: '#EF4444', label: 'PDF' };
     if (ext === 'txt') return { color: '#3B82F6', label: 'TXT' };
     if (ext === 'md') return { color: '#8B5CF6', label: 'MD' };
-    return { color: '#0D9488', label: 'DOC' };
+    return { color: '#00C68D', label: 'DOC' };
   };
 
   // SVG circular uploader math
@@ -267,24 +276,7 @@ export const Sidebar = ({
   const activeModelInfo = models.find(m => m.name === selectedModel) || { name: selectedModel, size: 'Auto', speed: 3 };
 
   return (
-    <aside 
-      style={{
-        width: '280px',
-        height: '100vh',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        background: 'rgba(8, 8, 14, 0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderRight: '1px solid rgba(255, 255, 255, 0.06)',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 10,
-        color: '#fff',
-        boxSizing: 'border-box'
-      }}
-    >
+    <aside className={`app-sidebar ${isOpen ? 'open' : ''}`}>
       {/* 1. Logo Section */}
       <div 
         className="sidebar-logo-container"
@@ -294,7 +286,7 @@ export const Sidebar = ({
           alignItems: 'center',
           gap: '12px',
           padding: '0 20px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+          borderBottom: '1px solid var(--border-subtle)',
           position: 'relative'
         }}
       >
@@ -304,11 +296,11 @@ export const Sidebar = ({
             width: '36px',
             height: '36px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-teal))',
+            background: 'var(--accent-blue)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 10px rgba(124, 58, 237, 0.2)',
+            boxShadow: 'var(--shadow-sm)',
             position: 'relative'
           }}
         >
@@ -325,13 +317,22 @@ export const Sidebar = ({
               height: '8px',
               borderRadius: '50%',
               backgroundColor: isOllamaConnected ? '#10B981' : '#EF4444',
-              border: '2px solid #08080E'
+              border: '2px solid var(--bg-surface)'
             }}
           />
         </div>
-        <span style={{ fontSize: '18px', fontWeight: 600, letterSpacing: '-0.3px' }}>
+        <span style={{ fontSize: '18px', fontWeight: 600, letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
           VaultAI
         </span>
+
+        {/* Mobile close button */}
+        <button 
+          className="sidebar-close-btn"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          <IconClose size={20} />
+        </button>
       </div>
 
       {/* 2. Model Selector */}
@@ -343,7 +344,7 @@ export const Sidebar = ({
           zIndex: 15
         }}
       >
-        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255, 255, 255, 0.3)', marginBottom: '8px', fontWeight: 700 }}>
+        <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-tertiary)', marginBottom: '8px', fontWeight: 700 }}>
           Model
         </div>
         
@@ -355,9 +356,9 @@ export const Sidebar = ({
               width: '100%',
               padding: '10px 14px',
               borderRadius: '10px',
-              background: 'rgba(255, 255, 255, 0.03)',
+              background: 'var(--bg-surface-hover)',
               border: '1px solid var(--border-subtle)',
-              color: '#fff',
+              color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
@@ -372,9 +373,9 @@ export const Sidebar = ({
                   fontSize: '9px', 
                   padding: '2px 6px', 
                   borderRadius: '6px', 
-                  background: 'rgba(124, 58, 237, 0.15)', 
+                  background: 'var(--accent-purple-glow)', 
                   color: 'var(--accent-purple)', 
-                  border: '1px solid rgba(124, 58, 237, 0.3)',
+                  border: '1px solid var(--accent-purple)',
                   fontWeight: 700
                 }}
               >
@@ -393,11 +394,11 @@ export const Sidebar = ({
               top: '72px',
               left: '20px',
               right: '20px',
-              background: 'rgba(15, 15, 22, 0.95)',
+              background: 'var(--bg-surface)',
               border: '1px solid var(--border-default)',
               borderRadius: '12px',
               padding: '6px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+              boxShadow: 'var(--shadow-lg)',
               zIndex: 20,
               maxHeight: '260px',
               overflowY: 'auto'
@@ -424,8 +425,8 @@ export const Sidebar = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     fontSize: '13px',
-                    borderLeft: selectedModel === model.name ? '3px solid var(--accent-purple)' : '3px solid transparent',
-                    background: selectedModel === model.name ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
+                    borderLeft: selectedModel === model.name ? '3px solid var(--accent-blue)' : '3px solid transparent',
+                    background: selectedModel === model.name ? 'var(--bg-surface-hover)' : 'transparent',
                     marginBottom: '2px'
                   }}
                 >
@@ -451,7 +452,7 @@ export const Sidebar = ({
           flexDirection: 'column',
           minHeight: 0,
           padding: '8px 20px 16px 20px',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.04)'
+          borderBottom: '1px solid var(--border-subtle)'
         }}
       >
         <div 
@@ -462,7 +463,7 @@ export const Sidebar = ({
             marginBottom: '10px'
           }}
         >
-          <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 700 }}>
+          <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-tertiary)', fontWeight: 700 }}>
             Documents
           </span>
           <button 
@@ -528,7 +529,7 @@ export const Sidebar = ({
                       width: '36px',
                       height: '36px',
                       borderRadius: '8px',
-                      background: 'rgba(255, 255, 255, 0.02)',
+                      background: 'var(--bg-surface-hover)',
                       border: '1px solid var(--border-subtle)',
                       display: 'flex',
                       alignItems: 'center',
@@ -547,7 +548,7 @@ export const Sidebar = ({
                       style={{ 
                         fontSize: '13px', 
                         fontWeight: 500, 
-                        color: isActive ? '#fff' : 'var(--text-primary)',
+                        color: 'var(--text-primary)',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
@@ -561,7 +562,7 @@ export const Sidebar = ({
                         fontSize: '9px', 
                         padding: '1px 5px', 
                         borderRadius: '4px', 
-                        background: 'rgba(255, 255, 255, 0.05)', 
+                        background: 'var(--bg-surface)', 
                         color: 'var(--text-secondary)',
                         fontWeight: 600,
                         border: '1px solid var(--border-subtle)',
@@ -586,7 +587,7 @@ export const Sidebar = ({
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: 'rgba(255, 255, 255, 0.4)',
+                        color: 'var(--text-tertiary)',
                         cursor: 'pointer',
                         padding: '4px',
                         display: 'flex',
@@ -632,11 +633,11 @@ export const Sidebar = ({
           {...getRootProps()}
           style={{
             border: isDragActive 
-              ? '1.5px dashed var(--accent-purple)' 
-              : '1.5px dashed rgba(255,255,255,0.15)',
+              ? '1.5px dashed var(--accent-blue)' 
+              : '1.5px dashed var(--border-default)',
             background: isDragActive 
-              ? 'rgba(124,58,237,0.08)' 
-              : 'rgba(255,255,255,0.01)',
+              ? 'var(--accent-blue-glow)' 
+              : 'var(--bg-surface)',
             borderRadius: '12px',
             padding: '16px',
             textAlign: 'center',
@@ -662,7 +663,7 @@ export const Sidebar = ({
                     cy="18" 
                     r={strokeRadius} 
                     fill="transparent" 
-                    stroke="rgba(255, 255, 255, 0.05)" 
+                    stroke="var(--border-subtle)" 
                     strokeWidth="3" 
                   />
                   {/* Fill progress indicator */}
@@ -671,7 +672,7 @@ export const Sidebar = ({
                     cy="18" 
                     r={strokeRadius} 
                     fill="transparent" 
-                    stroke="var(--accent-purple)" 
+                    stroke="var(--accent-blue)" 
                     strokeWidth="3"
                     strokeDasharray={strokeCircumference}
                     strokeDashoffset={strokeOffset}
@@ -691,7 +692,7 @@ export const Sidebar = ({
               <IconCloudUpload 
                 size={28} 
                 style={{ 
-                  color: isDragActive ? 'var(--accent-purple)' : 'rgba(255,255,255,0.3)',
+                   color: isDragActive ? 'var(--accent-blue)' : 'var(--text-tertiary)',
                   transform: isDragActive ? 'scale(1.15)' : 'scale(1)',
                   transition: 'transform 200ms ease'
                 }} 
@@ -707,7 +708,7 @@ export const Sidebar = ({
       {/* 5. Settings Panel */}
       <div 
         style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+          borderBottom: '1px solid var(--border-subtle)',
           boxSizing: 'border-box'
         }}
       >
@@ -745,14 +746,14 @@ export const Sidebar = ({
               display: 'flex',
               flexDirection: 'column',
               gap: '14px',
-              background: 'rgba(0,0,0,0.1)'
+              background: 'var(--bg-base)'
             }}
           >
             {/* Slider 1: Temperature */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)' }}>
                 <span>Temperature</span>
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-purple)' }}>{settings.temperature.toFixed(2)}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-blue)' }}>{settings.temperature.toFixed(2)}</span>
               </div>
               <input 
                 type="range" 
@@ -769,7 +770,7 @@ export const Sidebar = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)' }}>
                 <span>Chunk Size</span>
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-purple)' }}>{settings.chunkSize} tokens</span>
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-blue)' }}>{settings.chunkSize} tokens</span>
               </div>
               <input 
                 type="range" 
@@ -786,7 +787,7 @@ export const Sidebar = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)' }}>
                 <span>Top-k Contexts</span>
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-purple)' }}>{settings.topK} chunks</span>
+                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-blue)' }}>{settings.topK} chunks</span>
               </div>
               <input 
                 type="range" 
@@ -811,7 +812,7 @@ export const Sidebar = ({
           justifyContent: 'space-between',
           fontSize: '11px',
           color: 'var(--text-secondary)',
-          background: 'rgba(0, 0, 0, 0.15)',
+          background: 'var(--bg-base)',
           boxSizing: 'border-box'
         }}
       >

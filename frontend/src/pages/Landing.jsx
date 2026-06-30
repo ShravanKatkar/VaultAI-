@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { use3DTilt } from '../hooks/use3DTilt';
-import { VaultOrb } from '../components/3D/VaultOrb';
 import { Aurora } from '../components/3D/Aurora';
 import { RAGFlow } from '../components/3D/RAGFlow';
 import { API_BASE_URL } from '../config';
@@ -330,7 +329,7 @@ export const Landing = ({ onLaunch }) => {
   return (
     <div 
       style={{ 
-        backgroundColor: '#0A0A0F', 
+        backgroundColor: 'var(--bg-base)', 
         minHeight: '100vh', 
         width: '100%', 
         position: 'relative', 
@@ -357,28 +356,16 @@ export const Landing = ({ onLaunch }) => {
           left: 0, 
           right: 0, 
           bottom: 0, 
-          background: 'radial-gradient(ellipse 800px 600px at 50% 40%, rgba(124, 58, 237, 0.08) 0%, transparent 70%)', 
+          background: 'radial-gradient(ellipse 800px 600px at 50% 40%, var(--accent-blue-glow) 0%, transparent 70%)', 
           pointerEvents: 'none', 
           zIndex: 0 
         }} 
       />
 
       {/* Hero Outer Wrapper */}
-      <div 
-        style={{ 
-          maxWidth: '1200px', 
-          width: '100%', 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 400px', 
-          gap: '40px', 
-          alignItems: 'center', 
-          position: 'relative', 
-          zIndex: 2,
-          boxSizing: 'border-box'
-        }}
-      >
+      <div className="landing-hero-grid">
         {/* Left Side: Headline & CTAs */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           
           {/* Framer Motion stagger for words */}
           <motion.div 
@@ -387,8 +374,7 @@ export const Landing = ({ onLaunch }) => {
             animate="visible"
             style={{ marginBottom: '32px' }}
           >
-            {/* Tagline: Offline. Private. Instant. */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
               {headlineWords.tags.map((word, idx) => (
                 <motion.span 
                   key={`tag-${idx}`} 
@@ -396,7 +382,7 @@ export const Landing = ({ onLaunch }) => {
                   style={{ 
                     fontSize: '14px', 
                     fontWeight: 600, 
-                    color: 'rgba(255, 255, 255, 0.4)', 
+                    color: 'var(--text-tertiary)', 
                     letterSpacing: '0.2em', 
                     textTransform: 'uppercase' 
                   }}
@@ -407,17 +393,7 @@ export const Landing = ({ onLaunch }) => {
             </div>
 
             {/* Line 1: Your documents. */}
-            <h1 
-              style={{ 
-                margin: 0, 
-                fontSize: '56px', 
-                fontWeight: 300, 
-                lineHeight: '1.15', 
-                color: '#fff', 
-                letterSpacing: '-1.5px',
-                display: 'block' 
-              }}
-            >
+            <h1 className="landing-headline-main" style={{ fontWeight: 300, color: 'var(--text-primary)' }}>
               {headlineWords.line1.map((word, idx) => (
                 <motion.span 
                   key={`l1-${idx}`} 
@@ -431,16 +407,10 @@ export const Landing = ({ onLaunch }) => {
 
             {/* Line 2: Your intelligence. */}
             <h1 
+              className="landing-headline-main"
               style={{ 
-                margin: 0, 
-                fontSize: '56px', 
                 fontWeight: 600, 
-                lineHeight: '1.15', 
-                letterSpacing: '-1.5px',
-                background: 'linear-gradient(135deg, #7C3AED, #0D9488)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                display: 'block',
+                color: 'var(--accent-blue)',
                 marginTop: '4px'
               }}
             >
@@ -457,7 +427,7 @@ export const Landing = ({ onLaunch }) => {
           </motion.div>
 
           {/* CTA Row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '56px' }}>
+          <div className="landing-cta-row" style={{ marginBottom: '56px' }}>
             <button 
               className="btn cta-launch-btn"
               onClick={onLaunch}
@@ -469,7 +439,7 @@ export const Landing = ({ onLaunch }) => {
                 fontWeight: 500,
                 color: '#fff',
                 cursor: 'pointer',
-                boxShadow: '0 4px 20px rgba(124, 58, 237, 0.25)'
+                boxShadow: '0 4px 20px var(--accent-blue-glow)'
               }}
             >
               Launch VaultAI
@@ -499,21 +469,14 @@ export const Landing = ({ onLaunch }) => {
           </div>
 
           {/* Stats Row */}
-          <div 
-            style={{ 
-              display: 'flex', 
-              gap: '20px', 
-              width: '100%', 
-              flexWrap: 'wrap' 
-            }}
-          >
+          <div className="landing-stats-row">
             <StatCard 
               icon={IconWifiOff} 
               label="100% Offline" 
               subtext="Zero network calls, fully local vector operations" 
               targetValue={systemStats.offline_pct} 
               valueSuffix="%" 
-              glowColor="#10B981" 
+              glowColor="var(--accent-teal)" 
             />
             <StatCard 
               icon={IconBolt} 
@@ -521,7 +484,7 @@ export const Landing = ({ onLaunch }) => {
               subtext="Optimized parallel chunks retrieval" 
               targetValue={systemStats.latency_s} 
               valueSuffix="s" 
-              glowColor="#F59E0B" 
+              glowColor="var(--accent-yellow)" 
             />
             <StatCard 
               icon={IconLock} 
@@ -529,23 +492,11 @@ export const Landing = ({ onLaunch }) => {
               subtext="Your secure documents never leave this device" 
               targetValue={systemStats.data_shared} 
               valueSuffix="" 
-              glowColor="#8B5CF6" 
+              glowColor="var(--accent-purple)" 
             />
           </div>
         </div>
 
-        {/* Right Side: Rotating 3D Three.js Orb */}
-        <div 
-          style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center', 
-            position: 'relative',
-            height: '400px'
-          }}
-        >
-          <VaultOrb size={360} />
-        </div>
       </div>
 
       {/* RAG Flow Pipeline Visualization */}

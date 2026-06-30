@@ -54,8 +54,11 @@ export const VaultOrb = ({ size = 300 }) => {
   return (
     <div 
       style={{ 
-        width: `${size}px`, 
-        height: `${size}px`, 
+        width: '100%',
+        height: '100%',
+        maxWidth: `${size}px`,
+        maxHeight: `${size}px`,
+        aspectRatio: '1',
         position: 'relative', 
         cursor: 'pointer' 
       }}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { MessageSquare, FileText, Activity, Brain, Sun, Moon } from 'lucide-react';
+import { MessageSquare, FileText, Activity, Brain, Sun, Moon, Menu } from 'lucide-react';
 import ChatTab from './components/ChatTab';
 import DocumentsTab from './components/DocumentsTab';
 import EvalDashboard from './pages/EvalDashboard';
@@ -9,9 +9,20 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { UploadModal } from './components/Upload/UploadModal';
 import { API_BASE_URL } from './config';
 
+// Customized Premium VaultAI logo matching safe lock dial and V+A branding
+const IconVaultLogo = ({ size = 24, color = 'currentColor', className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10" strokeWidth="2" />
+    <path d="M8 8l4 8 4-8" />
+    <path d="M10 12h4" strokeWidth="2" />
+    <circle cx="12" cy="9.5" r="1.5" fill={color} />
+  </svg>
+);
+
 export default function App() {
   const { theme, toggleTheme } = useTheme();
   const [isLaunched, setIsLaunched] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('chat');
   const [collections, setCollections] = useState([]);
   const [loadingCollections, setLoadingCollections] = useState(false);
@@ -177,8 +188,16 @@ export default function App() {
   }
 
   return (
-    <div style={{ paddingLeft: '280px', minHeight: '100vh', width: '100%', boxSizing: 'border-box' }}>
+    <div className="app-root-layout">
+      {/* Sidebar overlay backdrop */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
       <Sidebar 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         collections={collections}
         selectedCollection={selectedCollection}
         setSelectedCollection={setSelectedCollection}
@@ -195,8 +214,15 @@ export default function App() {
         {/* Header Bar */}
         <header className="app-header">
           <div className="logo-container">
+            <button 
+              className="sidebar-toggle-btn"
+              onClick={() => setIsSidebarOpen(true)}
+              aria-label="Open sidebar"
+            >
+              <Menu size={24} />
+            </button>
             <div className="logo-icon">
-              <Brain size={24} />
+              <IconVaultLogo size={24} color="#fff" />
             </div>
             <div>
               <div className="logo-text">VaultAI</div>

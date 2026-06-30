@@ -14,8 +14,8 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(13, 148, 136, 0.04) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(0, 85, 218, 0.03) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 198, 141, 0.03) 0%, transparent 40%);
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   transition: background-color 200ms ease-out, color 200ms ease-out;
@@ -102,7 +102,7 @@ button, input, select, textarea, .tab-btn, .btn, .icon-btn, .dropzone, .eval-tes
 }
 
 .logo-icon {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+  background: var(--accent-blue);
   width: 42px;
   height: 42px;
   border-radius: 12px;
@@ -117,9 +117,7 @@ button, input, select, textarea, .tab-btn, .btn, .icon-btn, .dropzone, .eval-tes
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, var(--text-primary) 30%, var(--text-secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
 }
 
 .logo-tag {
@@ -166,7 +164,7 @@ button, input, select, textarea, .tab-btn, .btn, .icon-btn, .dropzone, .eval-tes
 
 .tab-btn.active {
   color: white;
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+  background: var(--accent-blue);
   box-shadow: var(--shadow-md);
 }
 
@@ -276,7 +274,7 @@ html.light .form-control {
 }
 
 .btn {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+  background: var(--accent-blue);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -305,7 +303,7 @@ html.light .form-control {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  background: var(--accent-purple);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -490,12 +488,12 @@ html.light .form-control {
 }
 
 .chat-message.user .message-avatar {
-  background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple));
+  background: var(--accent-blue);
   color: white;
 }
 
 .chat-message.assistant .message-avatar {
-  background: linear-gradient(135deg, var(--accent-purple), var(--accent-teal));
+  background: var(--accent-purple);
   color: white;
 }
 
@@ -509,8 +507,8 @@ html.light .form-control {
 }
 
 .chat-message.user .message-bubble {
-  background: var(--accent-purple-glow);
-  border: 1px solid var(--border-strong);
+  background: rgba(0, 85, 218, 0.08);
+  border: 1px solid rgba(0, 85, 218, 0.2);
   color: var(--text-primary);
   border-top-right-radius: 4px;
 }
@@ -974,16 +972,15 @@ html.light .eval-diff-box {
 }
 
 .cta-launch-btn {
-  background: linear-gradient(120deg, #7C3AED 0%, #0D9488 40%, rgba(255, 255, 255, 0.4) 50%, #0D9488 60%, #7C3AED 100%) !important;
-  background-size: 300% 100% !important;
-  background-position: 0% 0%;
+  background: var(--accent-blue) !important;
+  background-size: initial !important;
+  background-position: initial;
   transition: transform 200ms ease-out, box-shadow 200ms ease-out !important;
 }
 
 .cta-launch-btn:hover {
   transform: scale(1.03) !important;
-  box-shadow: 0 0 32px rgba(124, 58, 237, 0.5) !important;
-  animation: shimmer 2s linear infinite;
+  box-shadow: 0 0 32px var(--accent-blue-glow) !important;
 }
 
 .floating-container {
@@ -1087,7 +1084,7 @@ html.light .eval-diff-box {
   top: 15%;
   height: 70%;
   width: 3px;
-  background: linear-gradient(to bottom, var(--accent-purple), var(--accent-teal));
+  background: var(--accent-blue);
   border-radius: 0 4px 4px 0;
 }
 
@@ -1096,7 +1093,7 @@ html.light .eval-diff-box {
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: linear-gradient(to right, var(--accent-purple), var(--accent-teal));
+  background: var(--accent-blue);
   outline: none;
   cursor: pointer;
 }
@@ -1108,8 +1105,8 @@ html.light .eval-diff-box {
   height: 14px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid var(--accent-purple);
-  box-shadow: 0 0 8px var(--accent-purple-glow);
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 0 8px var(--accent-blue-glow);
   transition: transform 150ms ease;
 }
 
@@ -1206,4 +1203,249 @@ html.light .eval-diff-box {
   border-width: 6px;
   border-style: solid;
   border-color: transparent transparent rgba(15, 15, 22, 0.95) transparent;
+}
+
+/* --- Responsive & Mobile Layout Additions --- */
+
+/* Root Layout Wrapper */
+.app-root-layout {
+  min-height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 280px;
+  transition: padding-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sidebar Styling Override */
+.app-sidebar {
+  width: 280px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(8, 8, 14, 0.9);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  color: #fff;
+  box-sizing: border-box;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sidebar Mobile Overlay Backdrop */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 4, 8, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sidebar Toggle Buttons */
+.sidebar-toggle-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  transition: background 200ms ease;
+}
+
+.sidebar-toggle-btn:hover {
+  background: var(--bg-surface-hover);
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+}
+
+.sidebar-close-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Landing Page Global Centered Layout (No 3D Orb) */
+.landing-hero-grid {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.landing-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.landing-stats-row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.eval-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.eval-row-diff {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Mobile Media Queries (Breakpoint: 768px) */
+@media (max-width: 768px) {
+  .app-root-layout {
+    padding-left: 0 !important;
+  }
+
+  .app-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .app-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  }
+
+  .sidebar-toggle-btn {
+    display: inline-flex;
+    margin-right: 12px;
+  }
+
+  .sidebar-close-btn {
+    display: inline-flex;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+  }
+
+  /* Responsive App Header */
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding: 16px 0;
+  }
+
+  .logo-container {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  /* Horizontal scrolling for tab navigation on mobile */
+  .nav-tabs {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+  }
+
+  .nav-tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+  }
+
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  /* ChatPanel responsive adjustments */
+  .chat-messages {
+    padding: 12px !important;
+  }
+
+  .chat-message {
+    max-width: 90% !important;
+  }
+
+  .chat-input-bar {
+    padding: 12px !important;
+  }
+
+  /* Landing Page responsiveness override */
+  .landing-headline-main {
+    font-size: 32px !important;
+    line-height: 1.25 !important;
+  }
+
+  .landing-cta-row {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+
+  .landing-cta-row button, .landing-cta-row a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Fix table display in document vaults on small screen sizes */
+  .premium-table th, .premium-table td {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .app-container {
+    padding: 0 16px;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .dashboard-content {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .eval-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .eval-row-diff {
+    grid-template-columns: 1fr;
+  }
 }

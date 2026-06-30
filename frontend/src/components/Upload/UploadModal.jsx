@@ -65,10 +65,10 @@ function formatFileSize(bytes) {
 
 function getFileTypeInfo(filename) {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
-  if (ext === 'pdf') return { gradient: 'linear-gradient(135deg, #EF4444, #B91C1C)', label: 'PDF Document', icon: <IconFilePdf /> };
-  if (ext === 'txt') return { gradient: 'linear-gradient(135deg, #3B82F6, #1D4ED8)', label: 'Text File', icon: <IconFileTxt /> };
-  if (ext === 'md')  return { gradient: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', label: 'Markdown File', icon: <IconFileMd /> };
-  return { gradient: 'linear-gradient(135deg, #6B7280, #374151)', label: 'Document', icon: <IconFileTxt /> };
+  if (ext === 'pdf') return { gradient: '#EF4444', label: 'PDF Document', icon: <IconFilePdf /> };
+  if (ext === 'txt') return { gradient: '#3B82F6', label: 'Text File', icon: <IconFileTxt /> };
+  if (ext === 'md')  return { gradient: '#8B5CF6', label: 'Markdown File', icon: <IconFileMd /> };
+  return { gradient: '#6B7280', label: 'Document', icon: <IconFileTxt /> };
 }
 
 function estimateChunks(file, chunkSize = 512) {
@@ -235,7 +235,7 @@ const CanvasRipple = () => {
 // Animated spinning arc for active stage
 const SpinnerArc = () => (
   <svg width="28" height="28" viewBox="0 0 28 28" className="upload-stage-spinner" style={{ position: 'absolute', inset: 0 }}>
-    <circle cx="14" cy="14" r="11" fill="none" stroke="var(--accent-purple)" strokeWidth="2.5"
+    <circle cx="14" cy="14" r="11" fill="none" stroke="var(--accent-blue)" strokeWidth="2.5"
       strokeDasharray="20 49" strokeLinecap="round" />
   </svg>
 );
@@ -414,7 +414,7 @@ export const UploadModal = ({
             onDrop={handleModalDrop}
             style={{
               position: 'fixed', inset: 0, zIndex: 1000,
-              background: 'rgba(0, 0, 0, 0.72)',
+              background: 'rgba(15, 23, 42, 0.4)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -425,7 +425,7 @@ export const UploadModal = ({
               onClick={handleClose}
               style={{
                 position: 'absolute', top: 20, right: 24,
-                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                background: 'var(--bg-surface-hover)', border: '1px solid var(--border-default)',
                 borderRadius: '10px', padding: '8px',
                 color: 'var(--text-secondary)', cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -453,23 +453,22 @@ export const UploadModal = ({
                     key="drag-zone"
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="upload-border-pulse"
                     style={{
                       width: '100%', minHeight: 300,
-                      background: 'rgba(15, 15, 22, 0.9)',
+                      background: 'var(--bg-surface)',
                       backdropFilter: 'blur(16px)',
-                      border: '2px dashed rgba(124, 58, 237, 0.4)',
+                      border: '2px dashed var(--accent-blue)',
                       borderRadius: '20px',
                       display: 'flex', flexDirection: 'column',
                       alignItems: 'center', justifyContent: 'center',
                       gap: 20, padding: 40,
                       cursor: 'pointer',
-                      boxShadow: '0 0 40px rgba(124, 58, 237, 0.12)',
+                      boxShadow: 'var(--shadow-md)',
                     }}
                     onClick={handleBrowseClick}
                   >
                     <div style={{
-                      color: isDragHovering ? 'var(--accent-purple)' : 'rgba(255,255,255,0.35)',
+                      color: isDragHovering ? 'var(--accent-blue)' : 'var(--text-tertiary)',
                       transition: 'color 200ms, transform 200ms',
                       transform: isDragHovering ? 'scale(1.15) translateY(-4px)' : 'scale(1)',
                     }}>
@@ -477,12 +476,12 @@ export const UploadModal = ({
                     </div>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{
-                        fontSize: '16px', fontWeight: 600, color: '#fff', marginBottom: 6
+                        fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6
                       }}>
                         {isDragHovering ? 'Release to drop file' : 'Drop a file here'}
                       </div>
                       <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                        or <span style={{ color: 'var(--accent-purple)', fontWeight: 600, cursor: 'pointer' }}>click to browse</span>
+                        or <span style={{ color: 'var(--accent-blue)', fontWeight: 600, cursor: 'pointer' }}>click to browse</span>
                       </div>
                       <div style={{
                         marginTop: 12, fontSize: '11px', color: 'var(--text-tertiary)',
@@ -504,12 +503,12 @@ export const UploadModal = ({
                     transition={{ duration: 0.2 }}
                     style={{
                       width: '100%',
-                      background: 'rgba(15, 15, 22, 0.92)',
+                      background: 'var(--bg-surface)',
                       backdropFilter: 'blur(16px)',
                       border: '1px solid var(--border-default)',
                       borderRadius: '20px',
                       overflow: 'hidden',
-                      boxShadow: '0 8px 40px rgba(0, 0, 0, 0.5)',
+                      boxShadow: 'var(--shadow-lg)',
                     }}
                   >
                     {/* Colored banner */}
@@ -532,7 +531,7 @@ export const UploadModal = ({
                     {/* Body */}
                     <div style={{ padding: '24px 28px' }}>
                       <div style={{
-                        fontSize: '16px', fontWeight: 600, color: '#fff', marginBottom: 4,
+                        fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4,
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }} title={file.name}>
                         {file.name}
@@ -544,12 +543,12 @@ export const UploadModal = ({
                       }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                           <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-tertiary)', fontWeight: 700 }}>Size</span>
-                          <span style={{ fontWeight: 600, color: '#fff' }}>{formatFileSize(file.size)}</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{formatFileSize(file.size)}</span>
                         </div>
                         <div style={{ width: 1, background: 'var(--border-subtle)' }} />
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                           <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-tertiary)', fontWeight: 700 }}>Chunks</span>
-                          <span style={{ fontWeight: 600, color: '#fff' }}>~{estChunks} estimated</span>
+                          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>~{estChunks} estimated</span>
                         </div>
                       </div>
 
@@ -561,8 +560,7 @@ export const UploadModal = ({
                           style={{
                             flex: 1, padding: '12px 20px',
                             borderRadius: 12, border: 'none',
-                            background: 'linear-gradient(120deg, #7C3AED 0%, #0D9488 40%, rgba(255,255,255,0.3) 50%, #0D9488 60%, #7C3AED 100%)',
-                            backgroundSize: '250% 100%',
+                            background: 'var(--accent-blue)',
                             color: '#fff', fontSize: '14px', fontWeight: 600,
                             cursor: 'pointer', fontFamily: 'var(--font-ui)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -599,12 +597,12 @@ export const UploadModal = ({
                     transition={{ duration: 0.2 }}
                     style={{
                       width: '100%',
-                      background: 'rgba(15, 15, 22, 0.92)',
+                      background: 'var(--bg-surface)',
                       backdropFilter: 'blur(16px)',
                       border: '1px solid var(--border-default)',
                       borderRadius: '20px',
                       padding: '32px 28px',
-                      boxShadow: '0 8px 40px rgba(0, 0, 0, 0.5)',
+                      boxShadow: 'var(--shadow-lg)',
                     }}
                   >
                     <div style={{
@@ -635,10 +633,10 @@ export const UploadModal = ({
                                 {/* Indicator circle */}
                                 <div style={{
                                   width: 28, height: 28, borderRadius: '50%',
-                                  border: isDone ? 'none' : isActive ? '2px solid transparent' : '2px dashed rgba(255,255,255,0.15)',
+                                  border: isDone ? 'none' : isActive ? '2px solid transparent' : '2px dashed var(--border-default)',
                                   background: isDone ? 'var(--accent-teal)' : 'transparent',
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                  boxShadow: isActive ? '0 0 14px rgba(124, 58, 237, 0.5)' : 'none',
+                                  boxShadow: isActive ? '0 0 14px var(--accent-blue-glow)' : 'none',
                                   position: 'relative',
                                   flexShrink: 0,
                                   transition: 'all 300ms ease',
@@ -651,7 +649,7 @@ export const UploadModal = ({
                                 <div>
                                   <div style={{
                                     fontSize: '13px', fontWeight: 600,
-                                    color: isActive || isDone ? '#fff' : 'var(--text-tertiary)',
+                                    color: isActive || isDone ? 'var(--text-primary)' : 'var(--text-tertiary)',
                                     transition: 'color 300ms ease',
                                   }}>
                                     {stage.label}
@@ -674,8 +672,8 @@ export const UploadModal = ({
                                 <div style={{
                                   width: 2, height: 16, marginLeft: 13,
                                   background: isDone
-                                    ? 'linear-gradient(to bottom, var(--accent-teal), var(--accent-purple))'
-                                    : 'rgba(255,255,255,0.08)',
+                                    ? 'var(--accent-teal)'
+                                    : 'var(--border-subtle)',
                                   transition: 'background 300ms ease',
                                 }} />
                               )}
@@ -695,7 +693,7 @@ export const UploadModal = ({
                       }}>
                         <span style={{
                           padding: '2px 6px', borderRadius: 4, fontSize: '9px', fontWeight: 800,
-                          background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-subtle)',
+                          background: 'var(--bg-base)', border: '1px solid var(--border-subtle)',
                           color: 'var(--text-tertiary)',
                         }}>
                           {file.name.split('.').pop()?.toUpperCase()}
@@ -716,12 +714,12 @@ export const UploadModal = ({
                     transition={{ type: 'spring', damping: 22, stiffness: 300 }}
                     style={{
                       width: '100%',
-                      background: 'rgba(15, 15, 22, 0.92)',
+                      background: 'var(--bg-surface)',
                       backdropFilter: 'blur(16px)',
-                      border: '1px solid rgba(16, 185, 129, 0.2)',
+                      border: '1px solid var(--accent-teal)',
                       borderRadius: '20px',
                       padding: '40px 28px',
-                      boxShadow: '0 0 30px rgba(16, 185, 129, 0.1)',
+                      boxShadow: 'var(--shadow-md)',
                       display: 'flex', flexDirection: 'column', alignItems: 'center',
                       gap: 16, position: 'relative', overflow: 'hidden',
                     }}
@@ -732,16 +730,16 @@ export const UploadModal = ({
                     {/* Check icon */}
                     <div style={{
                       width: 64, height: 64, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #10B981, #059669)',
+                      background: 'var(--accent-teal)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      boxShadow: '0 0 24px rgba(16, 185, 129, 0.4), 0 0 48px rgba(16, 185, 129, 0.15)',
+                      boxShadow: 'var(--accent-teal-glow)',
                       animation: 'upload-success-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     }}>
                       <IconCheck size={28} />
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '18px', fontWeight: 600, color: '#fff', marginBottom: 4 }}>
+                      <div style={{ fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
                         Successfully Indexed
                       </div>
                       <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
@@ -766,9 +764,9 @@ export const UploadModal = ({
                       onClick={handleClose}
                       style={{
                         marginTop: 8, padding: '10px 28px', borderRadius: 10,
-                        background: 'rgba(16, 185, 129, 0.1)',
-                        border: '1px solid rgba(16, 185, 129, 0.25)',
-                        color: '#10B981', fontSize: '13px', fontWeight: 600,
+                        background: 'var(--accent-teal-glow)',
+                        border: '1px solid var(--accent-teal)',
+                        color: 'var(--accent-teal)', fontSize: '13px', fontWeight: 600,
                         cursor: 'pointer', fontFamily: 'var(--font-ui)',
                         transition: 'all 200ms ease',
                       }}
@@ -788,31 +786,31 @@ export const UploadModal = ({
                     className="upload-shake"
                     style={{
                       width: '100%',
-                      background: 'rgba(15, 15, 22, 0.92)',
+                      background: 'var(--bg-surface)',
                       backdropFilter: 'blur(16px)',
-                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                      border: '1px solid var(--accent-purple)',
                       borderRadius: '20px',
                       padding: '32px 28px',
-                      boxShadow: '0 0 20px rgba(239, 68, 68, 0.12)',
+                      boxShadow: 'var(--shadow-md)',
                       display: 'flex', flexDirection: 'column', alignItems: 'center',
                       gap: 16, textAlign: 'center',
                     }}
                   >
                     <div style={{
                       width: 52, height: 52, borderRadius: '50%',
-                      background: 'rgba(239, 68, 68, 0.1)',
-                      border: '1px solid rgba(239, 68, 68, 0.25)',
+                      background: 'var(--accent-purple-glow)',
+                      border: '1px solid var(--accent-purple)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#EF4444',
+                      color: 'var(--accent-purple)',
                     }}>
                       <IconAlertTriangle size={24} />
                     </div>
 
                     <div>
-                      <div style={{ fontSize: '16px', fontWeight: 600, color: '#fff', marginBottom: 4 }}>
+                      <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
                         Upload Failed
                       </div>
-                      <div style={{ fontSize: '13px', color: '#EF4444', lineHeight: 1.5 }}>
+                      <div style={{ fontSize: '13px', color: 'var(--accent-purple)', lineHeight: 1.5 }}>
                         {error || 'An unknown error occurred.'}
                       </div>
                     </div>
@@ -822,9 +820,9 @@ export const UploadModal = ({
                         onClick={() => { reset(); }}
                         style={{
                           padding: '10px 20px', borderRadius: 10,
-                          background: 'rgba(239, 68, 68, 0.1)',
-                          border: '1px solid rgba(239, 68, 68, 0.25)',
-                          color: '#EF4444', fontSize: '13px', fontWeight: 600,
+                          background: 'var(--accent-purple-glow)',
+                          border: '1px solid var(--accent-purple)',
+                          color: 'var(--accent-purple)', fontSize: '13px', fontWeight: 600,
                           cursor: 'pointer', fontFamily: 'var(--font-ui)',
                           transition: 'all 200ms ease',
                         }}
@@ -857,19 +855,18 @@ export const UploadModal = ({
       <style dangerouslySetInnerHTML={{ __html: `
         .upload-confirm-btn:hover {
           transform: translateY(-1px) !important;
-          box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4) !important;
-          animation: upload-shimmer 2s linear infinite;
+          box-shadow: 0 4px 20px var(--accent-blue-glow) !important;
         }
         .upload-cancel-btn:hover {
           border-color: var(--border-strong) !important;
           color: var(--text-primary) !important;
         }
         .upload-close-btn:hover {
-          background: rgba(255, 255, 255, 0.1) !important;
+          background: var(--bg-surface-hover) !important;
           color: var(--text-primary) !important;
         }
         .upload-dismiss-btn:hover {
-          background: rgba(16, 185, 129, 0.2) !important;
+          background: var(--accent-teal-glow) !important;
         }
       `}} />
     </>

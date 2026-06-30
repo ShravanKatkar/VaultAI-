@@ -187,7 +187,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
     canvas.height = window.innerHeight;
 
     const particles = [];
-    const colors = ['#7C3AED', '#0D9488', '#F59E0B', '#3B82F6', '#EC4899', '#10B981'];
+    const colors = ['#FF0052', '#00C68D', '#FFD400', '#0055DA', '#EC4899', '#10B981'];
 
     // Spawn 120 particles around the button
     const buttonElement = document.getElementById('run-eval-btn');
@@ -537,7 +537,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
               disabled={runningEval || !selectedCollection}
               onClick={runEvaluation}
               style={{ 
-                background: 'linear-gradient(135deg, var(--accent-purple), var(--accent-teal))',
+                background: 'var(--accent-purple)',
                 padding: '10px 20px',
                 borderRadius: '8px',
                 minWidth: '150px',
@@ -656,7 +656,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
 
       {/* 3-Column Metrics Card Row */}
       {selectedRun && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginTop: '20px' }}>
+        <div className="eval-metrics-grid" style={{ marginTop: '20px' }}>
           
           {/* Card 1: Hit@3 Arc Gauge */}
           <div ref={metricCard1Ref} className="glass-panel" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '190px', position: 'relative' }}>
@@ -687,7 +687,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                 <path 
                   d="M 10 70 A 60 60 0 0 1 130 70" 
                   fill="none" 
-                  stroke="#0D9488" 
+                  stroke="#00C68D" 
                   strokeWidth="10" 
                   strokeLinecap="round" 
                   strokeDasharray={strokeLength}
@@ -742,7 +742,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                 <path 
                   d="M 10 70 A 60 60 0 0 1 130 70" 
                   fill="none" 
-                  stroke="#7C3AED" 
+                  stroke="#FF0052" 
                   strokeWidth="10" 
                   strokeLinecap="round" 
                   strokeDasharray={strokeLength}
@@ -829,10 +829,10 @@ export default function EvalDashboard({ collections, selectedCollection }) {
               <div style={{ 
                 height: `${Math.min(100, (selectedRun.avg_latency_ms / 5000) * 100)}%`, 
                 width: '100%', 
-                background: 'linear-gradient(to top, #D97706, #F59E0B)', 
+                background: 'var(--accent-yellow)', 
                 borderRadius: '20px',
                 transition: 'height 800ms cubic-bezier(0.4, 0, 0.2, 1)',
-                boxShadow: '0 0 10px rgba(245, 158, 11, 0.4)'
+                boxShadow: '0 0 10px var(--accent-yellow-glow)'
               }} />
             </div>
           </div>
@@ -861,8 +861,8 @@ export default function EvalDashboard({ collections, selectedCollection }) {
               >
                 <defs>
                   <linearGradient id="colorLatency" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#7C3AED" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#7C3AED" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#FF0052" stopOpacity="0.4"/>
+                    <stop offset="95%" stopColor="#FF0052" stopOpacity="0"/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.04)" />
@@ -926,12 +926,12 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                 <Area 
                   type="monotone" 
                   dataKey="latency" 
-                  stroke="#7C3AED" 
+                  stroke="#FF0052" 
                   strokeWidth={2}
                   fillOpacity={1} 
                   fill="url(#colorLatency)" 
-                  dot={{ r: 3, fill: '#7C3AED', stroke: 'transparent' }}
-                  activeDot={{ r: 5, fill: '#7C3AED', stroke: '#fff', strokeWidth: 1.5 }}
+                  dot={{ r: 3, fill: '#FF0052', stroke: 'transparent' }}
+                  activeDot={{ r: 5, fill: '#FF0052', stroke: '#fff', strokeWidth: 1.5 }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -1024,7 +1024,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
                               <div style={{ 
                                 height: '100%', 
                                 width: `${result.rouge_l * 100}%`, 
-                                background: result.rouge_l > 0.7 ? '#7C3AED' : '#3B82F6',
+                                background: result.rouge_l > 0.7 ? '#FF0052' : '#0055DA',
                                 borderRadius: '4px' 
                               }} />
                             </div>
@@ -1083,7 +1083,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
             </div>
 
             {/* Expected Source vs Retrieved Sources */}
-            <div className="eval-row-diff" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div className="eval-row-diff" style={{ marginBottom: '16px' }}>
               <div className="eval-diff-box" style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid var(--border-subtle)', padding: '12px 16px', borderRadius: '8px' }}>
                 <div className="eval-diff-title" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '6px' }}>
                   Expected Source Document
@@ -1123,7 +1123,7 @@ export default function EvalDashboard({ collections, selectedCollection }) {
             </div>
 
             {/* Ground Truth Answer vs Model Generated Answer */}
-            <div className="eval-row-diff" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="eval-row-diff">
               <div className="eval-diff-box" style={{ background: 'rgba(0, 0, 0, 0.2)', border: '1px solid var(--border-subtle)', padding: '16px', borderRadius: '8px' }}>
                 <div className="eval-diff-title" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '8px' }}>
                   Ground Truth Reference
